@@ -1,0 +1,17 @@
+<html>
+<body>
+<img id="image">
+
+<!-- now have access to some socket.io methods -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.js" integrity="sha512-rwu37NnL8piEGiFhe2c5j4GahN+gFsIn9k/0hkRY44iz0pc81tBNaUN56qF8X4fy+5pgAAgYi2C9FXdetne5sQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+const socket = io.connect('http://localhost:3000')
+socket.on('image', (image) => {
+    console.log('data', image)
+    const imageContain = document.getElementById('image')
+    imageContain.src = `data:image/jpeg;base64,${image}`
+})
+</script>
+
+</body>
+</html>
