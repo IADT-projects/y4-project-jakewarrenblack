@@ -1,61 +1,37 @@
-const { S3Client } = require('@aws-sdk/client-s3')
-const multer = require('multer');
-const path = require('path');
-const multerS3 = require('multer-s3');
+const {S3} = require("@aws-sdk/client-s3");
+const ID = process.env.MY_AWS_ACCESS_KEY_ID
+const SECRET = process.env.MY_AWS_SECRET_ACCESS_KEY
+const BUCKET = process.env.MY_AWS_BUCKET
+const REGION = process.env.MY_AWS_REGION
 
-let storage;
-
-if(process.env.STORAGE_ENGINE === 'S3'){
-    const s3 = new S3Client({
-        region: process.env.MY_AWS_REGION,
-        credentials: {
-            accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY
-        }
-    });
-
-    storage = multerS3({
-        s3: s3,
-        bucket: process.env.MY_AWS_BUCKET,
-        // acl: 'public-read',
-        contentType: multerS3.AUTO_CONTENT_TYPE,
-        metadata: function (req, file, cb) {
-            cb(null, {fieldName: file.fieldname});
-        },
-        key: function (req, file, cb) {
-            cb(null, Date.now() + path.extname(file.originalname))
-        }
-    });
-}
-else {
-    storage = multer.diskStorage({
-    destination: ( req, file, cb ) => {
-        cb(null, 'public' + process.env.STATIC_FILES_URL);
-    },
-    filename: ( req, file, cb ) => {
-        console.log(file.path);
-        console.log(file.originalname);
-
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
+// Initializing S3 Interface
+const s3 = new S3({
+    accessKeyId: ID,
+    secretAccessKey: SECRET,
+    region: REGION
 });
+
+const imageUpload = (req, res) => {
+    // The fileUpload middleware running in server.js lets us pull in a buffer representation of the image in req.files.foo.data
+    const fileContent = Buffer.from(req.files.data.data, 'binary')
+
+    // Providing AWS access credentials
+    const params = {
+        Bucket: BUCKET,
+        Key: req.files.data.name,
+        Body: fileContent
+    }
+
+    s3.upload(params, (err, data) => {
+        if (err) {
+            throw err;
+        }
+        res.status(200).json({
+            "response_data": data,
+        })
+    })
 }
 
-
-
-const fileFilter = (req, file, cb) => {
-
-    if (!file) {
-        req.imageError = "Image not uploaded!";
-        return cb(null, false);
-    }
-    else if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        req.imageError = "Image must be jpg|jpeg|png|gif";
-        return cb(null, false);
-    }
-
-    cb(null, true);
-};
-
-
-module.exports = multer({ fileFilter, storage });
+module.exports = {
+    imageUpload
+}
