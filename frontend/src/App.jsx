@@ -1,12 +1,13 @@
 import React, {useEffect, useRef, useState} from "react";
 import DiffCamEngine from "diff-cam-engine";
+import axios from "axios";
 
 function App() {
     const [captureData, setCaptureData] = useState(null)
     const motion = useRef(null)
     const video = useRef(null)
     const scoreEl = useRef(null)
-    const [capturedImage, setCapturedImage] = useState('')
+    const [capturedImage, setCapturedImage] = useState(null)
 
     useEffect(() => {
         DiffCamEngine.init({
@@ -18,14 +19,47 @@ function App() {
         });
     }, [])
 
+    // diff-engine has a method 'getURL()' which returns a capture of the canvas as an ArrayBuffer. We need it as a blob to send to Express.
+    const dataURItoBlob = (dataURI) => {
+        const binary = atob(dataURI.split(',')[1]);
+        const array = [];
+
+        for(let i = 0; i < binary.length; i++) {
+            array.push(binary.charCodeAt(i));
+        }
+
+        return new Blob([new Uint8Array(array)], {type: 'image/jpeg'});
+    }
+
+    // FIXME: this runs twice because it takes time for the threshold to go down again, need to give it a few ms after capturing, so it's not noticing the same event twice
     useEffect(() => {
         if(captureData?.score > 100){
             alert('Movement')
 
-            // TODO: Send this same image data to the backend for storage on s3. We can use it for performing inference with our ML model.
+            // inside diff-engine, captureCallback contains a getUrl method, which in turn returns the captured canvas.getDataURL()
+            // to upload to s3, we should be able to convert this to a blob
+            const blob = dataURItoBlob(captureData.getURL());
+
+            // Creating a FormData object to append our data blob (image), alongside an image name
+            const formData = new FormData();
+            formData.append('image', blob, 'image.png');
+
             setCapturedImage(captureData.getURL())
+            setCaptureData(null)
+
+            axios.post('http://localhost:3001/api/upload/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(function (response) {
+                console.log(response);
+            }).catch(function (error) {
+                console.log(error);
+            });
+
         }
     }, [captureData?.score])
+
 
 
   return (

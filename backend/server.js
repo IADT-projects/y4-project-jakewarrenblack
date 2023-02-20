@@ -1,10 +1,8 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 3001;
 const fileUpload = require('express-fileupload')
-
-// Using fileUpload middleware
-app.use(fileUpload(undefined))
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
