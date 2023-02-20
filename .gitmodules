@@ -1,0 +1,6 @@
+[submodule "RAID-Frontend"]
+	path = RAID-Frontend
+	url = https://github.com/jakewarrenblack/RAID-Frontend.git
+[submodule "RAID-Backend"]
+	path = RAID-Backend
+	url = https://github.com/jakewarrenblack/RAID-Backend.git
