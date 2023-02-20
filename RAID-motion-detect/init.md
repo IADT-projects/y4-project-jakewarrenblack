@@ -1,1 +1,0 @@
-Detecting motion in python
