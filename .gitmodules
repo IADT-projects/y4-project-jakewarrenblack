@@ -4,6 +4,3 @@
 [submodule "RAID-Backend"]
 	path = RAID-Backend
 	url = https://github.com/jakewarrenblack/RAID-Backend.git
-[submodule "RAID-motion-detect"]
-	path = RAID-motion-detect
-	url = https://github.com/jakewarrenblack/RAID-motion-detect.git
