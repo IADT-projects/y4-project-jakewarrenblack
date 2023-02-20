@@ -63,7 +63,7 @@ function App() {
 
 
   return (
-    <div className={'flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto'}>
+    <div className={'flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2'}>
         <div className={'[&>*]:w-full flex'}>
             <figure>
                 <figcaption>Live Video</figcaption>
@@ -81,7 +81,9 @@ function App() {
 
         <figure className={'mt-5 w-full h-full'}>
             { capturedImage &&
+
                 <figure>
+                    <br/>
                     <figcaption>Last detected movement:</figcaption>
                     <img className={'w-full h-full'} alt={'Screenshot of motion capture'} src={capturedImage}/>
                 </figure>
