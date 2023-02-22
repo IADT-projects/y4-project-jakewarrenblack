@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 const port = 3001;
-const fileUpload = require('express-fileupload')
-const bodyParser = require('body-parser');
+const cors = require('cors')
+
+app.use(cors())
 
 require('dotenv').config();
 

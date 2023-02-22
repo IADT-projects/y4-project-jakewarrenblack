@@ -1,13 +1,14 @@
 {
-  "name": "api-image-example",
+  "name": "raid-backend",
   "version": "1.0.0",
-  "description": "This example shows how to accept images in an incoming request",
+  "description": "Live webcam streaming and S3 upload interface for RAID frontend",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js"
+    "dev": "(cd livecam && node index.js) && nodemon server.js ",
+    "start": "concurrently \"nodemon server.js\" \"(cd livecam && node index.js)\""
   },
-  "author": "Mohammed Che",
+  "author": "Jake Black",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^2.0.20"
@@ -15,6 +16,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.223.0",
     "body-parser": "^1.20.1",
+    "concurrently": "^7.6.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
@@ -22,6 +25,8 @@
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
     "raw-body": "^2.5.1",
-    "sharp": "^0.31.3"
+    "sharp": "^0.31.3",
+    "dicer": "^0.3.0",
+    "socket.io": "^4.6.1"
   }
 }
