@@ -3,6 +3,14 @@ import DiffCamEngine from "./diff-cam-engine";
 import axios from "axios";
 import { io } from "socket.io-client";
 
+let canvas, context;
+
+window.addEventListener('load', () => {
+    canvas = document.getElementById('videoCanvas');
+    context = canvas.getContext('2d');
+})
+
+
 function App() {
     const [captureData, setCaptureData] = useState(null)
     const motion = useRef(null)
@@ -18,7 +26,7 @@ function App() {
             const imageData = ctx.getImageData(0, 0, video.current.width, video.current.height);
             if (imageData.data.some((value) => value !== 0)) {
                 DiffCamEngine.init({
-                    canvas: video.current,
+                    canvas: canvas,
                     // captureIntervalTime: 50,
                     // includeMotionBox: true,
                     // includeMotionPixels: true,
@@ -95,8 +103,7 @@ function App() {
 
         socket.on("image", (data) => {
 
-            let canvas = document.getElementById('videoCanvas');
-            let context = canvas.getContext('2d');
+
             let imageObj = new Image();
             imageObj.onload = function () {
                 context.drawImage(imageObj, 0, 0, 320, 180);
