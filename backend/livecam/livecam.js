@@ -28,6 +28,7 @@ class GstLaunch {
     getPath = function() {
         console.log('** TRYING TO GET GSTREAMER PATH **')
         var detected_path = undefined;
+        console.log('PLATFORM', OS.platform())
 
         if (OS.platform() == 'win32') {
             console.log('** PLATFORM IS WIN32 **')
@@ -76,18 +77,19 @@ class GstLaunch {
                 }
             }
         } else if (OS.platform() == 'linux') {
+            console.log('os platform is linux')
             // Look for GStreamer on PATH
-            var path_dirs = process.env.PATH.split(':');
-            for (var index = 0; index < path_dirs.length; ++index) {
-                try {
-                    var base = Path.normalize(path_dirs[index]);
-                    var bin = Path.join(
-                        base,
-                        gst_launch_executable);
-                    FS.accessSync(bin, FS.F_OK);
-                    detected_path = bin;
-                } catch (e) { /* no-op */ }
+
+            var bin = '/usr/bin/gst-launch-1.0'
+
+            try{
+                FS.accessSync(bin, FS.F_OK);
+                detected_path = bin;
             }
+            catch(e){
+                console.log(e)
+            }
+
         } else if (OS.platform() == 'darwin') {
             try {
                 var bin = '/usr/local/bin/gst-launch-1.0'
@@ -172,7 +174,7 @@ class GstLiveCamServer {
 
         this.fake = config.fake || false;
         this.width = config.width || 800;
-        this.height = config.height || 600;
+           this.height = config.height || 600;
         this.framerate = config.framerate || 30;
         this.grayscale = config.grayscale || false;
         this.deviceIndex = config.deviceIndex || -1;
@@ -189,8 +191,8 @@ class GstLiveCamServer {
         // gst-launch-1.0 -v ksvideosrc do-stats=TRUE ! image/jpeg, width=640, height=480 ! jpegdec ! videoconvert ! autovideosink
 
         if( !this.fake ) {
-            // this.gst_video_src = 'v4l2src ! decodebin';
-            this.gst_video_src = '-v ksvideosrc do-stats=TRUE';
+            this.gst_video_src = 'v4l2src ! decodebin';
+            //this.gst_video_src = '-v ksvideosrc do-stats=TRUE';
         } else {
             this.gst_video_src = 'videotestsrc';
         }
@@ -207,6 +209,8 @@ class GstLiveCamServer {
             this.gst_video_src += ' ! videobalance saturation=0.0 ! videoconvert';
         }
     }
+
+    
 
     /*!
     * @fn start

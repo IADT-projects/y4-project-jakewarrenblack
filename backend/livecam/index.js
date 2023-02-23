@@ -1,4 +1,6 @@
-const LiveCam = require('livecam')
+const LiveCam = require('./livecam')
+
+require('dotenv').config();
 
 const webcam_server = new LiveCam
 ({
