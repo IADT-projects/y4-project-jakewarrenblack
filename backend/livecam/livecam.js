@@ -191,7 +191,7 @@ class GstLiveCamServer {
         // gst-launch-1.0 -v ksvideosrc do-stats=TRUE ! image/jpeg, width=640, height=480 ! jpegdec ! videoconvert ! autovideosink
 
         if( !this.fake ) {
-            this.gst_video_src = 'v4l2src ! decodebin';
+            this.gst_video_src = 'v4l2src ! decodebin ! motioncells';
             //this.gst_video_src = '-v ksvideosrc do-stats=TRUE';
         } else {
             this.gst_video_src = 'videotestsrc';
