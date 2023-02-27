@@ -1,73 +1,30 @@
-import cv2
-import threading
 from ultralytics import YOLO
-import numpy as np
-
-
-class RecordingThread(threading.Thread):
-    def __init__(self, name, camera):
-        threading.Thread.__init__(self)
-        self.name = name
-        self.isRunning = True
-
-        self.cap = camera
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        self.out = cv2.VideoWriter('./static/video.avi', fourcc, 20.0, (640, 480))
-
-    def run(self):
-        while self.isRunning:
-            ret, frame = self.cap.read()
-            if ret:
-                self.out.write(frame)
-
-        self.out.release()
-
-    def stop(self):
-        self.isRunning = False
-
-    def __del__(self):
-        self.out.release()
+import cv2
 
 
 class VideoCamera(object):
     def __init__(self):
-        # Open a camera
-        self.cap = cv2.VideoCapture(0)
-
-        # Initialize video recording environment
-        self.is_record = False
-        self.out = None
-
-        # Thread for recording
-        self.recordingThread = None
-
-        self.model = YOLO('../yolov8/models/animals.pt') # A custom YOLOv8 model trained on around 1000 animal photos
+        # Using OpenCV to capture from device 0. If you have trouble capturing
+        # from a webcam, comment the line below out and use a video file
+        # instead.
+        self.video = cv2.VideoCapture(0)
+        self.model = YOLO('../yolov8/models/animals.pt')
+        # If you decide to use video.mp4, you must have this file in the folder
+        # as the main.py.
+        # self.video = cv2.VideoCapture('video.mp4')
 
     def __del__(self):
-        self.cap.release()
+        self.video.release()
 
     def get_frame(self):
-        ret, frame = self.cap.read()
+        ret, frame = self.video.read()
+        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
+        # so we must encode it into JPEG in order to correctly display the
+        # video stream.
+        # Run inference on the frame using YOLO
+        results = self.model.predict(frame, show=False,conf=0.5)  # Running inference and returning the result from get_frame
 
-        if ret:
-            # Run inference on the frame using YOLO
-            results = self.model.predict(frame, show=False, conf=0.5) # Running inference and returning the result from get_frame
+        ret, jpeg = cv2.imencode('.jpg', frame)
 
-            ret, jpeg = cv2.imencode('.jpg', frame)
-
-            # Return the JPEG-encoded frame and the results
-            return jpeg.tobytes(), results
-
-        else:
-            return None
-
-    def start_record(self):
-        self.is_record = True
-        self.recordingThread = RecordingThread("Video Recording Thread", self.cap)
-        self.recordingThread.start()
-
-    def stop_record(self):
-        self.is_record = False
-
-        if self.recordingThread != None:
-            self.recordingThread.stop()
+        # Return the JPEG-encoded frame and the results
+        return jpeg.tobytes(), results
