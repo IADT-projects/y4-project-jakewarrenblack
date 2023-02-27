@@ -1,5 +1,7 @@
 import cv2
 import threading
+from ultralytics import YOLO
+import numpy as np
 
 
 class RecordingThread(threading.Thread):
@@ -39,6 +41,8 @@ class VideoCamera(object):
         # Thread for recording
         self.recordingThread = None
 
+        self.model = YOLO('../yolov8/models/animals.pt') # A custom YOLOv8 model trained on around 1000 animal photos
+
     def __del__(self):
         self.cap.release()
 
@@ -46,9 +50,13 @@ class VideoCamera(object):
         ret, frame = self.cap.read()
 
         if ret:
+            # Run inference on the frame using YOLO
+            results = self.model.predict(frame, show=False, conf=0.5) # Running inference and returning the result from get_frame
+
             ret, jpeg = cv2.imencode('.jpg', frame)
 
-            return jpeg.tobytes()
+            # Return the JPEG-encoded frame and the results
+            return jpeg.tobytes(), results
 
         else:
             return None
