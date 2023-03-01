@@ -2,3 +2,7 @@ Flask
 opencv-python
 ultralytics
 numpy
+flask_socketio
+flask_cors
+eventlet
+gunicorn
