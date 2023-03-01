@@ -7,6 +7,9 @@ import time
 import queue
 import threading
 
+# command to run on linux: gunicorn --worker-class eventlet -w 1 server:app
+# windows: (pip install waitress first) - waitress-serve --port=5000 server:app
+
 
 app = Flask(__name__)
 
