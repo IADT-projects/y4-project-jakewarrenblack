@@ -1,14 +1,12 @@
 import React, {useEffect, useRef, useState} from "react";
-import DiffCamEngine from "./diff-cam-engine";
 import axios from "axios";
-import { io } from "socket.io-client";
 
 let canvas, context;
 
-window.addEventListener('load', () => {
-    canvas = document.getElementById('videoCanvas');
-    context = canvas.getContext('2d');
-})
+// window.addEventListener('load', () => {
+//     canvas = document.getElementById('videoCanvas');
+//     context = canvas.getContext('2d');
+// })
 
 
 function App() {
@@ -17,35 +15,6 @@ function App() {
     const video = useRef(null)
     const scoreEl = useRef(null)
     const [capturedImage, setCapturedImage] = useState(null)
-
-    useEffect(() => {
-        const ctx = video.current.getContext('2d');
-
-        // if imageData is found in the canvas, initialise DiffCamEngine, otherwise request another animation frame and see if there's image data present
-        const checkImageData = () => {
-            const imageData = ctx.getImageData(0, 0, video.current.width, video.current.height);
-            if (imageData.data.some((value) => value !== 0)) {
-                DiffCamEngine.init({
-                    canvas: canvas,
-                    // captureIntervalTime: 50,
-                    // includeMotionBox: true,
-                    // includeMotionPixels: true,
-                    // threshold: 8,
-                    motionCanvas: motion.current,
-                    initSuccessCallback: () => DiffCamEngine.start(),
-                    initErrorCallback: () => alert('Something went wrong'),
-                    captureCallback: payload => setCaptureData(payload) // payload.imageData contains an image in the Uint8ClampedArray format
-                });
-            } else {
-                requestAnimationFrame(checkImageData);
-            }
-        };
-        requestAnimationFrame(checkImageData);
-
-        return () => {
-            DiffCamEngine.stop();
-        };
-    }, []);
 
     // diff-engine has a method 'getURL()' which returns a capture of the canvas as an ArrayBuffer. We need it as a blob to send to Express.
     // const dataURItoBlob = (dataURI) => {
@@ -93,30 +62,30 @@ function App() {
     const [imgSrc, setImgSrc] = useState("");
     const [error, setError] = useState(false);
 
-    const socket = io("http://127.0.0.1:12000");
+    //const socket = io("http://127.0.0.1:12000");
 
-    useEffect(() => {
-        socket.on("connect_error", (e) => {
-            console.log(e)
-            setError(true);
-        });
-
-        socket.on("image", (data) => {
-
-
-            let imageObj = new Image();
-            imageObj.onload = function () {
-                context.drawImage(imageObj, 0, 0, 320, 180);
-            };
-            imageObj.src = `data:image/jpeg;base64,${data}`;
-
-            //setImgSrc(`data:image/jpeg;base64,${data}`);
-        });
-
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
+    // useEffect(() => {
+    //     socket.on("connect_error", (e) => {
+    //         console.log(e)
+    //         setError(true);
+    //     });
+    //
+    //     socket.on("image", (data) => {
+    //
+    //
+    //         let imageObj = new Image();
+    //         imageObj.onload = function () {
+    //             context.drawImage(imageObj, 0, 0, 320, 180);
+    //         };
+    //         imageObj.src = `data:image/jpeg;base64,${data}`;
+    //
+    //         //setImgSrc(`data:image/jpeg;base64,${data}`);
+    //     });
+    //
+    //     return () => {
+    //         socket.disconnect();
+    //     };
+    // }, []);
 
 
   return (
@@ -124,16 +93,17 @@ function App() {
         <div className={'[&>*]:w-full flex'}>
             <figure>
                 <figcaption>Live Video</figcaption>
-                <canvas ref={video} id="videoCanvas" className={'w-full h-full rendering-pixelated bg-black'}/>
+                {/*<canvas ref={video} id="videoCanvas" className={'w-full h-full rendering-pixelated bg-black'}/>*/}
+                <img src={'http://127.0.0.1:5000/video_feed'}/>
             </figure>
 
-            <figure>
-                <figcaption className={'flex'}>
-                    <strong className={'mr-2'}>Motion Heatmap</strong>
-                    Movement Threshold: <span ref={scoreEl}>{captureData?.score}</span>
-                </figcaption>
-                <canvas ref={motion} className={'w-full h-full rendering-pixelated bg-black'}></canvas>
-            </figure>
+            {/*<figure>*/}
+            {/*    <figcaption className={'flex'}>*/}
+            {/*        <strong className={'mr-2'}>Motion Heatmap</strong>*/}
+            {/*        Movement Threshold: <span ref={scoreEl}>{captureData?.score}</span>*/}
+            {/*    </figcaption>*/}
+            {/*    <canvas ref={motion} className={'w-full h-full rendering-pixelated bg-black'}></canvas>*/}
+            {/*</figure>*/}
         </div>
 
         {/*<figure className={'mt-5 w-full h-full'}>*/}
