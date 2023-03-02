@@ -1,14 +1,11 @@
 from flask import Flask, render_template, Response, jsonify, request
 from camera import VideoCamera
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/": {"origins": "*"}})
 
 video_camera = None
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 
 def gen(camera):
@@ -27,6 +24,7 @@ def gen(camera):
 
 
 @app.route('/video_feed')
+@cross_origin()
 def video_feed():
     return Response(gen(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
 

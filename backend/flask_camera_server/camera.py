@@ -1,12 +1,13 @@
 from ultralytics import YOLO
 import cv2
-import time
+
 
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
         self.model = YOLO('../yolov8/models/animals.pt')
-        self.target_size = (320, 240)  # 240p - resizing frame before providing it to YOLO, trying to speed up inference.
+        self.target_size = (
+            320, 240)  # 240p - resizing frame before providing it to YOLO, trying to speed up inference.
 
     def get_frame(self):
         ret, frame = self.video.read()
@@ -30,7 +31,8 @@ class VideoCamera(object):
                     x1, y1, x2, y2 = map(int, bbox[:4])
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     # Access the last index of the bbox array. The format of bbox is [x1, y1, x2, y2, inference certainty, label index]
-                    cv2.putText(frame, labels[int(bbox[-1])], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv2.putText(frame, labels[int(bbox[-1])], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),
+                                2)
 
         ret, jpeg = cv2.imencode('.jpg', frame)
 
