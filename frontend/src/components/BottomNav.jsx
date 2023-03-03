@@ -11,30 +11,30 @@ const BottomNav = () => {
             icon: <Home/>
         },
         {
-            iconName: 'Home',
+            iconName: 'Dashboard',
             icon: <Dashboard/>
         },
         {
-            iconName: 'Home',
+            iconName: 'Pets',
             icon: <Pets/>
         },
         {
-            iconName: 'Home',
+            iconName: 'Settings',
             icon: <Settings/>
         },
     ]
 
     const Icon = ({icon, iconName}) => {
         return (
-            <>
+            <div className={'flex flex-col items-center'}>
                 <i className={'text-navyLightest text-sm'}>{icon}</i>
-                <span className={'text-'}>{iconName}</span>
-            </>
+                <span className={'text-navyLightest'}>{iconName}</span>
+            </div>
         )
     }
 
     return (
-        <div>
+        <div className={'absolute left-0 bottom-0 w-screen flex justify-around my-2 font-light'}>
             {
                 icons.map((icon) => {
                     return <Icon {...icon}/>
