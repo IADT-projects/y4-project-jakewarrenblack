@@ -27,7 +27,7 @@ const BottomNav = () => {
     const Icon = ({icon, iconName}) => {
         return (
             <>
-                <i className={'text-navyLightest'}>{icon}</i>
+                <i className={'text-navyLightest text-sm'}>{icon}</i>
                 <span className={'text-'}>{iconName}</span>
             </>
         )

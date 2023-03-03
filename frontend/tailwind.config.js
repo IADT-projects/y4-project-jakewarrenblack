@@ -16,6 +16,14 @@ module.exports = {
           white: '#FFFFFE',
           alert: '#E52828',
         },
+        fontSize: {
+          base: '0rem',
+          '3xl': '2.28rem',
+          '2xl': '1.28rem',
+          xl: '1.14rem',// h3 weight regular, h4 weight is bold
+          sm: '0.71rem' // for bottom nav
+
+        }
       }
     },  // no options to configure
     variants: { // all the following default to ['responsive']
