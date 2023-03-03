@@ -10,15 +10,9 @@ video_camera = None
 
 
 def gen(camera):
-    global video_camera
-
-    if video_camera is None:
-        video_camera = VideoCamera()
-
     while True:
+        # camera.update_frame()
         frame, results = camera.get_frame()
-
-        # print('RESULTS', results)  # printing result of YOLOv8 inference, returned along with our jpeg
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
