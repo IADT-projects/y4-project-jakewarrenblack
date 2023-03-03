@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
+import BottomNav from "./components/BottomNav";
 
 function App() {
 
@@ -8,6 +9,7 @@ function App() {
         <div className={'[&>*]:w-full flex'}>
             <img alt={'video feed'} src={'http://127.0.0.1:5000/video_feed'}/>
         </div>
+        <BottomNav/>
     </div>
   );
 }

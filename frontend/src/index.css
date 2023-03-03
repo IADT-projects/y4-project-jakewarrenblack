@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    a, h1, h2, h3, h4, h5, h6, p, span{
+        @apply text-navy;
+    }
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: local('Inter'), url('./Font/Inter-VariableFont_slnt,wght.ttf') format('ttf');
+}
