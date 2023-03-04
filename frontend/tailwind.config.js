@@ -12,12 +12,12 @@ module.exports = {
           navyLight: '#2A303C', // input boxes
           navyLighter: '#737B88', // labels, icons
           navyLightest: '#878C98', // icon backgrounds
-          navyBtn: '#434B58',
+          navyBtn: '#434B58', // for buttons
           white: '#FFFFFE',
           alert: '#E52828',
         },
         fontSize: {
-          base: '0rem',
+          base: '1rem',
           '3xl': '2.28rem',
           '2xl': '1.28rem',
           xl: '1.14rem',// h3 weight regular, h4 weight is bold

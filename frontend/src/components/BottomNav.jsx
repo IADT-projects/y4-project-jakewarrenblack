@@ -3,6 +3,8 @@ import Dashboard from '@mui/icons-material/Dashboard';
 import Pets from '@mui/icons-material/Pets';
 import Settings from '@mui/icons-material/Settings';
 
+// TODO: Refine some aspects of this. Icon size. Font size. Font weight. Spacing, both horizontal and vertical. Change colour based on selected route.
+
 const BottomNav = () => {
 
     const icons = [
