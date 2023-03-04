@@ -1,82 +1,89 @@
-from queue import Queue
-
 from ultralytics import YOLO
 import cv2
-from threading import Thread, Lock
-from threaded_videocapture import ThreadedVideoCapture
-
-'''
-FileNotFoundError: ...\\venv\\Lib\\site-packages\\ultralytics\\assets does not exist
-
-YOLO might throw above error. I think this happens because `frame` is none, and so YOLO defaults to its default 
-assets, which aren't included with the pip package.
-
-https://github.com/ultralytics/ultralytics/issues/188
-
-Though still not sure why that would happen, since YOLO's `predict.py` (
-venv/Lib/site-packages/ultralytics/yolo/v8/detect/predict.py) defaults to using a hosted image if assets aren't found.
-'''
+from threading import Thread
+import time
+from baseCamera import BaseCamera
 
 
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
-
         self.model = YOLO('../yolov8/models/animals.pt')  # Load pretrained YOLO model
 
-        self._last_frame = None  # To keep track of the most recently available frame
+        self.Frame = []
+        self.status = False
+        self.isStopped = False
 
-        # Begin running update_frame on its own thread as soon as the VideoCamera object is initialised
-        self.update = Thread(target=self.update_frame).start()
+        self.start()
 
-       # self.lock = Lock()
+    def start(self):
+        print('-- Starting video streaming --')
+        Thread(target=self.queryFrame, daemon=True, args=()).start()
 
-        self.frame_queue = Queue(maxsize=1)
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.stop()
+        except Exception as e:
+            print("{}".format(str(e)))
+
+    def stop(self):
+        self.isStopped = True
+        print('-- Stop capturing --')
+
+    def getFrame(self):
+        # Returning the most recent frame
+        return self.status, self.Frame
+
+    def queryFrame(self):
+        while not self.isStopped:
+            self.status, self.Frame = self.video.read()
+        self.video.release()
 
     def __del__(self):
         self.video.release()
 
-    # To retrieve the frame from the feed and update it with our YOLO bounding box. To run in a separate thread.
-    def update_frame(self):
-        ret, frame = self.video.read()
 
-        # Do this check to make sure YOLO doesn't try to switch to a default asset for predictions
-        if frame is not None:
-            # Get the predicted bounding boxes and class labels for the image, running inference with YOLO
-            # Minimum detection confidence of 50%
-            results = self.model.predict(frame, conf=0.5)
+class Camera(BaseCamera):
+    @staticmethod
+    def frames():
+        with VideoCamera() as cam:
+            try:
+                while True:
+                    status, frame = cam.getFrame()
 
-            # Loop over the list of bounding boxes and labels from our results
-            for result in results:
-                bboxes = result.boxes.boxes
-                labels = result.names
+                    if not status: continue
 
-                # Draw the bounding boxes on the image
-                for bbox, label in zip(bboxes, labels):
-                    if bbox.numel() > 0:  # check if there are elements in the YOLO frame
-                        x1, y1, x2, y2 = map(int, bbox[:4])  # coords are 0-4
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                        # Get the last index from bbox array: Bbox format is [x1, y1, x2, y2, certainty %, label index]
-                        cv2.putText(frame, labels[int(bbox[-1])], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                    (0, 255, 0),
-                                    2)
+                    # now run inference and draw boxes and text to the thing
 
-            # Now we have a video frame with bounding box/label overlay. Ready for Flask to serve.
-           # self.lock.acquire()
-            #self._last_frame = frame
-           # self.lock.release()
+                    if frame is not None:
+                        # Get the predicted bounding boxes and class labels for the image, running inference with YOLO
+                        # Minimum detection confidence of 50%
+                        results = cam.model.predict(frame, conf=0.5)
 
-            self.frame_queue.put(frame)
+                        # Loop over the list of bounding boxes and labels from our results
+                        for result in results:
+                            bboxes = result.boxes.boxes
+                            labels = result.names
 
-    # To return the most recent frame in our JPEG encoding for Flask to serve
-    def get_frame(self):
-        #self.lock.acquire()
-        #frame = self._last_frame
-        #self.lock.release()
+                            # Draw the bounding boxes on the image
+                            for bbox, label in zip(bboxes, labels):
+                                if bbox.numel() > 0:  # check if there are elements in the YOLO frame
+                                    x1, y1, x2, y2 = map(int, bbox[:4])  # coords are 0-4
+                                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                                    # Get the last index from bbox array: Bbox format is [x1, y1, x2, y2, certainty
+                                    # %, label index]
+                                    cv2.putText(frame, labels[int(bbox[-1])], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                                                0.5,
+                                                (0, 255, 0),
+                                                2)
 
-        frame = self.frame_queue.get()
+                    # finally, outside that loop:
+                    yield cv2.imencode('.jpg', frame)[1].tobytes()
 
-        # We're using Motion JPEG, but OpenCV defaults to capture raw images, so we encode into JPEG for the browser.
-        # Return the JPEG-encoded frame and the results. Don't really need the results, just for printing.
-        ret, jpeg = cv2.imencode('.jpg', frame)
-        return jpeg.tobytes()
+            except Exception as e:
+                print("Inference error:{}".format(str(e)))
+                time.sleep(10)
+                cam.stop()

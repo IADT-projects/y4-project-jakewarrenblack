@@ -36,7 +36,7 @@ const BottomNav = () => {
     }
 
     return (
-        <div className={'absolute left-0 bottom-0 w-screen flex justify-around my-2 font-light'}>
+        <div className={'absolute left-0 bottom-0 w-screen flex justify-around mt-2 font-light bg-white py-2'}>
             {
                 icons.map((icon) => {
                     return <Icon {...icon}/>
