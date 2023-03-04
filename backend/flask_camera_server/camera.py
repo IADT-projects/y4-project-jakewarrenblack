@@ -1,3 +1,5 @@
+from queue import Queue
+
 from ultralytics import YOLO
 import cv2
 from threading import Thread, Lock
@@ -18,16 +20,18 @@ venv/Lib/site-packages/ultralytics/yolo/v8/detect/predict.py) defaults to using 
 
 class VideoCamera(object):
     def __init__(self):
-        # Replace OpenCV video capture with one which runs on a background thread
-        # With update_frame running on its own thread, we're getting some errors relating to OpenCV being unable to grab video frames
-        # Using this replacement in an attempt to solve this...
-        self.video = ThreadedVideoCapture(0)
+        self.video = cv2.VideoCapture(0)
 
         self.model = YOLO('../yolov8/models/animals.pt')  # Load pretrained YOLO model
+
         self._last_frame = None  # To keep track of the most recently available frame
 
         # Begin running update_frame on its own thread as soon as the VideoCamera object is initialised
         self.update = Thread(target=self.update_frame).start()
+
+       # self.lock = Lock()
+
+        self.frame_queue = Queue(maxsize=1)
 
     def __del__(self):
         self.video.release()
@@ -58,11 +62,19 @@ class VideoCamera(object):
                                     2)
 
             # Now we have a video frame with bounding box/label overlay. Ready for Flask to serve.
-            self._last_frame = frame
+           # self.lock.acquire()
+            #self._last_frame = frame
+           # self.lock.release()
+
+            self.frame_queue.put(frame)
 
     # To return the most recent frame in our JPEG encoding for Flask to serve
     def get_frame(self):
-        frame = self._last_frame
+        #self.lock.acquire()
+        #frame = self._last_frame
+        #self.lock.release()
+
+        frame = self.frame_queue.get()
 
         # We're using Motion JPEG, but OpenCV defaults to capture raw images, so we encode into JPEG for the browser.
         # Return the JPEG-encoded frame and the results. Don't really need the results, just for printing.

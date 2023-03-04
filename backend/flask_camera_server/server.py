@@ -6,6 +6,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/": {"origins": "*"}})
 video_camera = None
 
+
 # No changes made to this yet.
 def gen(camera):
     global video_camera
@@ -25,7 +26,8 @@ def gen(camera):
 def video_feed():
     # Multipart/x-mixed-replace mimetype is saying we're going to constantly replace the image with the next
     # available frame.
-    return Response(gen(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    # return Response(gen(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(video_camera.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == '__main__':
