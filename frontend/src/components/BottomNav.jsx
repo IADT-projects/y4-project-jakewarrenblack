@@ -1,7 +1,7 @@
-import Home from '@mui/icons-material/Home';
-import Dashboard from '@mui/icons-material/Dashboard';
-import Pets from '@mui/icons-material/Pets';
-import Settings from '@mui/icons-material/Settings';
+import {MdHomeFilled} from 'react-icons/md'
+import {MdDashboard} from 'react-icons/md'
+import {MdPets} from 'react-icons/md'
+import {MdSettings} from 'react-icons/md'
 
 // TODO: Refine some aspects of this. Icon size. Font size. Font weight. Spacing, both horizontal and vertical. Change colour based on selected route.
 
@@ -10,26 +10,26 @@ const BottomNav = () => {
     const icons = [
         {
             iconName: 'Home',
-            icon: <Home/>
+            icon: <MdHomeFilled/>
         },
         {
             iconName: 'Dashboard',
-            icon: <Dashboard/>
+            icon: <MdDashboard/>
         },
         {
             iconName: 'Pets',
-            icon: <Pets/>
+            icon: <MdPets/>
         },
         {
             iconName: 'Settings',
-            icon: <Settings/>
+            icon: <MdSettings/>
         },
     ]
 
     const Icon = ({icon, iconName}) => {
         return (
             <div className={'flex flex-col items-center'}>
-                <i className={'text-navyLightest text-sm'}>{icon}</i>
+                <i className={'text-navyLightest text-2xl'}>{icon}</i>
                 <span className={'text-navyLightest'}>{iconName}</span>
             </div>
         )

@@ -2,23 +2,20 @@
   "name": "raid_frontend",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@mui/icons-material": "^5.11.11",
-    "@mui/material": "^5.11.11",
     "array-to-image": "^1.0.0",
     "axios": "^1.3.3",
-    "diff-cam-engine": "^1.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-icons": "^4.8.0",
     "react-router-dom": "^6.8.2",
-    "socket.io-client": "^4.6.1",
-    "video-react": "^0.16.0"
+    "socket.io-client": "^4.6.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^1.0.7",
