@@ -11,6 +11,7 @@ class VideoCamera(object):
         self.model = YOLO('../yolov8/models/animals.pt')  # Load pretrained YOLO model
 
         self.Frame = []
+        self.objectName = None
         self.status = False
         self.isStopped = False
 
@@ -49,6 +50,8 @@ class VideoCamera(object):
 class Camera(BaseCamera):
     @staticmethod
     def frames():
+        objectname = None
+
         with VideoCamera() as cam:
             try:
                 while True:
@@ -71,6 +74,10 @@ class Camera(BaseCamera):
                             # Draw the bounding boxes on the image
                             for bbox, label in zip(bboxes, labels):
                                 if bbox.numel() > 0:  # check if there are elements in the YOLO frame
+
+                                    # means it sees something, we'll need to send a screenshot to a hosted endpoint eventually, but for now we'll try to notify the user via socketio...
+                                    objectname = labels[int(bbox[-1])]
+
                                     x1, y1, x2, y2 = map(int, bbox[:4])  # coords are 0-4
                                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                                     # Get the last index from bbox array: Bbox format is [x1, y1, x2, y2, certainty
@@ -81,7 +88,8 @@ class Camera(BaseCamera):
                                                 2)
 
                     # finally, outside that loop:
-                    yield cv2.imencode('.jpg', frame)[1].tobytes()
+                    yield cv2.imencode('.jpg', frame)[1].tobytes(), objectname
+
 
             except Exception as e:
                 print("Inference error:{}".format(str(e)))
