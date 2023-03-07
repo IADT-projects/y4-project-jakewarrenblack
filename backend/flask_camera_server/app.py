@@ -1,6 +1,4 @@
-from gevent import monkey
-monkey.patch_all()
-
+from distutils.log import debug
 import os
 from importlib import import_module
 from flask import Flask, Response, request
@@ -18,6 +16,7 @@ objectname = None
 
 thread = None
 thread_lock = Lock()
+
 
 # No changes made to this yet.
 def gen(camera):
@@ -42,14 +41,15 @@ def background_thread():
     """Example of how to send server generated events to clients."""
     prevobjectname = None
 
-    #print('object name in bg thread', objectname)
+    print('object name in bg thread')
     while True:
-        if objectname != prevobjectname and objectname is not None:
+        socketio.emit('testing',{'data': 'objectname'})
+        # if objectname != prevobjectname:
             
-            socketio.emit('my_response',{'data': objectname})
+        #     socketio.emit('testing',{'data': objectname})
 
-            #socketio.sleep(2)   
-            prevobjectname = objectname
+        #     #socketio.sleep(2)   
+        #     prevobjectname = objectname
 
 
 
@@ -66,13 +66,15 @@ def video_feed():
 """
 Decorator for connect
 """
-@socketio.event
+@socketio.on('connect')
 def connect():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(background_thread)
+    print("server socketio ")
+    #  global thread
+    #  with thread_lock:
+    #      if thread is None:
+    #          thread = socketio.start_background_task(background_thread)
     emit('my_response', {'data': 'Connected', 'count': 0})
+
 
 """
 Decorator for disconnect
@@ -81,6 +83,8 @@ Decorator for disconnect
 def disconnect():
     print('Client disconnected',  request.sid)
 
+
 if __name__ == '__main__':
     #app.run(host='0.0.0.0', debug=True)
-    socketio.run(app)
+    socketio.start_background_task(background_thread)
+    socketio.run(app, debug=True)
