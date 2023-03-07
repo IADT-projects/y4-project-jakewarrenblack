@@ -4,6 +4,8 @@ import axios from "axios";
 import BottomNav from "./components/BottomNav";
 import {Home} from "./pages/home";
 import {Login} from "./pages/login";
+import {Register} from "./pages/register";
+import {Pairing} from "./pages/pairing";
 
 function App() {
 
@@ -13,6 +15,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/pair" element={<Pairing />} />
             </Routes>
         </div>
         <BottomNav/>

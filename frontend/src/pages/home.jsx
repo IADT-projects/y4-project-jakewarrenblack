@@ -1,8 +1,20 @@
 import React, {useEffect, useState} from "react";
 import {Button} from '../components/Button'
 import axios from "axios";
+import {io} from 'socket.io-client'
 
 export const Home = () => {
+    //connect to the socket server.
+    const socket = io.connect("http://127.0.0.1:5000/" + document.domain + ":" + location.port);
+
+    useEffect(() => {
+
+
+        //receive details from server
+        socket.on("updateSensorData", function (msg) {
+            console.log("Received sensorData :: " + msg.value)
+        });
+    }, [socket])
 
 
     return (
