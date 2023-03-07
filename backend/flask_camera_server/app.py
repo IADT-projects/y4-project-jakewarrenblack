@@ -1,27 +1,23 @@
+from gevent import monkey
+monkey.patch_all()
+
 import os
 from importlib import import_module
 from flask import Flask, Response, request
 from flask_cors import CORS
 from camera import Camera
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from threading import Lock
 
 app = Flask(__name__)
 #cors = CORS(app, resources={r"/": {"origins": "*"}})
 video_camera = None
-socketio = SocketIO(app, cors_allowed_origins='http://192.168.1.9:3000/')
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 objectname = None
 
 thread = None
 thread_lock = Lock()
-
-def background_thread():
-    while True:
-        if objectname is not None:
-            socketio.emit('updateSensorData', {'value': objectname})
-            socketio.sleep(5) # since the feed is continuously running inference, it'd just keep emitting otherwise
-
 
 # No changes made to this yet.
 def gen(camera):
@@ -33,8 +29,30 @@ def gen(camera):
             # print('-- object name:', objectname)
             objectname = objectname
 
+            # this is printing, so why does the below event not work?
+            # print('object name in app.py -- ', objectname)
+
+            # socketio.emit('updateObjectName', {'value': objectname})
+
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+
+def background_thread():
+    """Example of how to send server generated events to clients."""
+    prevobjectname = None
+
+    #print('object name in bg thread', objectname)
+    while True:
+        if objectname != prevobjectname and objectname is not None:
+            
+            socketio.emit('my_response',{'data': objectname})
+
+            #socketio.sleep(2)   
+            prevobjectname = objectname
+
+
+
 
 
 @app.route('/video_feed')
@@ -48,15 +66,13 @@ def video_feed():
 """
 Decorator for connect
 """
-@socketio.on('connect')
+@socketio.event
 def connect():
-    global thread
-    print('Client connected')
-
     global thread
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(background_thread)
+    emit('my_response', {'data': 'Connected', 'count': 0})
 
 """
 Decorator for disconnect

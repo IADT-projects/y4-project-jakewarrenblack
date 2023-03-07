@@ -1,4 +1,5 @@
 # Source: https://github.com/jiankaiwang/Flask_Video_Streaming_for_Object_Detection
+from lib2to3.pytree import Base
 import time
 import threading
 try:
@@ -58,19 +59,30 @@ class BaseCamera(object):
     objectname = None
     last_access = 0  # time of last client access to the camera
     event = CameraEvent()
+    socketio = None
 
     def __init__(self):
         """Start the background camera thread if it isn't running yet."""
         if BaseCamera.thread is None:
             BaseCamera.last_access = time.time()
 
+            # passed socketio instance from app.py to here
+            #self.socketio = socket
+
+            #self.socketio.emit('hello', {'value': 'hello world'})
+
             # start background frame thread
             BaseCamera.thread = threading.Thread(target=self._thread, daemon=True)
             BaseCamera.thread.start()
 
+            #BaseCamera.socketThread = threading.Thread(target=self.socketio, dameon=True)
+            #BaseCamera.socketio.start()
+
             # wait until frames are available
             while self.get_frame() is None:
                 time.sleep(0)
+
+
 
     def get_frame(self):
         """Return the current camera frame."""
@@ -95,8 +107,11 @@ class BaseCamera(object):
         for frame, objectname in frames_iterator:
 
             if objectname is not None:
-                print('-- object name received from camera.py is', objectname)
+                #print('-- object name received from camera.py is', objectname)
                 BaseCamera.objectname = objectname
+
+                # self.socketio.emit('updateSensorData', {'value': objectname})
+                # socketio.sleep(5)
 
             BaseCamera.frame = frame
             BaseCamera.event.set()  # send signal to clients
