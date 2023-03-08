@@ -8,8 +8,11 @@
 
 // import {videoDetect} from './yoloObjectDetection'
 
-const {classifyImg} = require('./yoloObjectDetection')
-const { runVideoDetection } = require("./utils");
+//const {classifyImg} = require('./yoloObjectDetection')
+
+//const { runVideoDetection } = require("./utils");
+const { runVideoDetection } = require("./tensorflow_utils");
+const {classifyImage, classifyImg} = require('./tf_detect')
 
 const express = require("express");
 const { createServer } = require("http");
@@ -34,7 +37,7 @@ setInterval(() => {
         console.log(e)
     })
 
-},500)
+},1000)
 
 
 httpServer.listen(3001);

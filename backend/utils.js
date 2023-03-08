@@ -8,29 +8,56 @@ const dataPath = path.resolve(__dirname, '../data');
 exports.dataPath = dataPath;
 exports.getDataFilePath = fileName => path.resolve(dataPath, fileName);
 
-// open camera, read frames, end of stream reached? loop back to the start
-const grabFrames = async (videoFile, delay, onFrame) => {
-    const cap = new cv.VideoCapture(videoFile); // 0 is passed as videoFile, just the webcam's index
 
-    while (true) {
-        let frame = cap.read();
+// MO CODE: //
 
-        if (frame.empty) {
+const grabFrames = async(videoFile, delay, onFrame) => {
+    const cap = new cv.VideoCapture(videoFile);
+
+    while (true){
+        let frame = cap.read()
+
+        if(frame.empty){
             cap.reset();
-            frame = cap.read();
+            frame = cap.read()
         }
 
-        // Call the onFrame callback and wait for it to complete
-        const result = await onFrame(frame);
+        const result = await onFrame(frame)
 
-        if (result) {
+        if(result){
             return result;
         }
 
-        // Delay before reading the next frame
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(resolve, delay))
     }
-};
+}
+
+
+
+
+// open camera, read frames, end of stream reached? loop back to the start
+// const grabFrames = async (videoFile, delay, onFrame) => {
+//     const cap = new cv.VideoCapture(videoFile); // 0 is passed as videoFile, just the webcam's index
+//
+//     while (true) {
+//         let frame = cap.read();
+//
+//         if (frame.empty) {
+//             cap.reset();
+//             frame = cap.read();
+//         }
+//
+//         // Call the onFrame callback and wait for it to complete
+//         const result = await onFrame(frame);
+//
+//         if (result) {
+//             return result;
+//         }
+//
+//         // Delay before reading the next frame
+//         await new Promise(resolve => setTimeout(resolve, delay));
+//     }
+// };
 
 
 // const grabFrames = async (videoFile, delay, onFrame) => {
@@ -58,15 +85,22 @@ const grabFrames = async (videoFile, delay, onFrame) => {
 exports.grabFrames = grabFrames;
 
 
+// exports.runVideoDetection = async (src, detect) => {
+//
+//     // src is 0, our webcam index, 1000 delay to give it a chance to process the frame, and the callback takes the returned camera frame and runs the detect method on it
+//     let res = await grabFrames(src, 1000, async frame => {
+//         return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
+//     })
+//
+//     return res;
+// };
+
 exports.runVideoDetection = async (src, detect) => {
 
-    // src is 0, our webcam index, 1000 delay to give it a chance to process the frame, and the callback takes the returned camera frame and runs the detect method on it
-    let res = await grabFrames(src, 1000, async frame => {
-        return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
-    })
-
+    let res = await grabFrames(src, 1, detect);
+    //result = await detect(frame)
     return res;
-};
+}
 
 exports.drawRectAroundBlobs = (binaryImg, dstImg, minPxSize, fixedRectWidth) => {
     const {

@@ -117,11 +117,11 @@ const classifyImg = async img => {
         });
     });
 
-    console.log(text) // earlier when I logged this, it'd show the correct label, now shows undefined
-
+    //console.log(text) // earlier when I logged this, it'd show the correct label, now shows undefined
+    //cv.imshow('img', img)
     return cv.imencode('.jpg', img)
-};
 
+};
 
 
 module.exports = {
