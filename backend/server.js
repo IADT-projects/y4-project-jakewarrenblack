@@ -1,16 +1,40 @@
-const express = require('express');
+// const cors = require('cors')
+//const cv = require('@u4/opencv4nodejs');
+// app.use(cors())
+
+// // require('dotenv').config();
+
+// // app.use('/api/upload', require('./routes/upload'));
+
+// import {videoDetect} from './yoloObjectDetection'
+
+const {classifyImg} = require('./yoloObjectDetection')
+const { runVideoDetection } = require("./utils");
+
+const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
-const port = 3001;
-const cors = require('cors')
+const httpServer = createServer(app);
+const io = new Server(httpServer, { /* options */ });
 
-app.use(cors())
 
-require('dotenv').config();
-
-app.use('/api/upload', require('./routes/upload'));
-
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+io.on("connection", (socket) => {
+    console.log('user connected');  socket.on('disconnect', function () {
+        console.log('user disconnected');
+    });
 });
 
-module.exports = app
+setInterval(() => {
+
+    runVideoDetection(0, classifyImg).then((res) => {
+        io.emit('image', res);
+    }).catch((e) => {
+        console.log(e)
+    })
+
+},500)
+
+
+httpServer.listen(3001);
