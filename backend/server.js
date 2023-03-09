@@ -29,6 +29,9 @@ io.on("connection", (socket) => {
     });
 });
 
+let prevLabel;
+let emitCount = 10;
+
 setInterval(() => {
 
     runVideoDetection(0, classifyImg).then((res) => {
@@ -37,7 +40,24 @@ setInterval(() => {
         }
 
         if(res.text){
-            io.emit('detection', res.text);
+            // if e.g. we just detected a person, then detect a person again immediately afterward, don't notify for that
+            // wait for 10 iterations before emitting for the same object detection again
+
+            // it will STILL emit if the object it's detecting CHANGES
+            if(res.text.split(' ')[0] !== prevLabel || (emitCount === 0)){
+                io.emit('detection', res.text);
+
+                // if it's the case that we've emitted an event for this object already, but emitCount is 0, let it emit again, but reset counter
+                emitCount = 10;
+            }
+            else{
+                // every time we don't emit, decrease the counter,
+                // so on the 10th iteration, if we're still detecting the same object as the first time, let the user know
+                emitCount--;
+            }
+
+            // exclude the confidence score
+            prevLabel = res.text.split(' ')[0]
 
         }
 
