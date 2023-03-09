@@ -40,15 +40,17 @@ const classifyImg = async img => {
     const inputBlob = cv.blobFromImage(img, 1, size, vec3, true, true);
     net.setInput(inputBlob);
 
-    console.time("net.forward");
+    //console.time("net.forward");
     // forward pass input through entire network, will return
     // classification result as 1x1xNxM Mat
     const outputBlob = net.forward();
-    console.timeEnd("net.forward");
+    //console.timeEnd("net.forward");
 
     // get height and width from the image
     const [imgHeight, imgWidth] = img.sizes;
     const numRows = outputBlob.sizes.slice(2, 3);
+
+    let text;
 
     for (let y = 0; y < numRows; y += 1) {
         const confidence = outputBlob.at([0, 0, y, 2]);
@@ -69,7 +71,7 @@ const classifyImg = async img => {
             // draw the rect for the object
             img.drawRectangle(pt1, pt2, rectColor, rectThickness, rectLineType);
 
-            const text = `${className} ${confidence.toFixed(5)}`;
+            text = `${className} ${confidence.toFixed(5)}`;
             const org = new cv.Point(boxX, boxY + 15);
             const fontFace = cv.FONT_HERSHEY_SIMPLEX;
             const fontScale = 0.5;
@@ -81,7 +83,16 @@ const classifyImg = async img => {
         }
     }
 
-    return cv.imencode('.jpg', img)
+    let returnValue;
+
+    text ? returnValue = {
+        'img': cv.imencode('.jpg', img),
+        'text': text
+    } : {
+        'img': cv.imencode('.jpg', img),
+    }
+
+    return returnValue
 };
 
 //runVideoDetection(webcamPort, classifyImg);

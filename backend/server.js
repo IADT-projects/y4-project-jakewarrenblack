@@ -32,15 +32,20 @@ io.on("connection", (socket) => {
 setInterval(() => {
 
     runVideoDetection(0, classifyImg).then((res) => {
-        if(res){
-            io.emit('image', res);
+        if(res.img){
+            io.emit('image', res.img);
+        }
+
+        if(res.text){
+            io.emit('detection', res.text);
+
         }
 
     }).catch((e) => {
         console.log(e)
     })
 
-},1000)
+},500)
 
 
 httpServer.listen(3001);
