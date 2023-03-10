@@ -1,20 +1,27 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useLayoutEffect, useState} from "react";
 import {Button} from '../components/Button'
 import axios from "axios";
 import {io} from 'socket.io-client'
 
 export const Home = () => {
     //connect to the socket server.
-    const socket = io.connect("http://127.0.0.1:5000/" + document.domain + ":" + location.port);
+    const socket = io.connect("http://localhost:3001/");
+
 
     useEffect(() => {
-
-
-        //receive details from server
-        socket.on("updateSensorData", function (msg) {
-            console.log("Received sensorData :: " + msg.value)
+        // array buffer to base64 encoded string
+        socket.on("image", function (arrayBuffer) {
+            const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            //console.log(base64String)
+             document.getElementById('img').src = `data:image/jpeg;base64,${base64String}`
         });
+
+        socket.on("detection", function (detectionLabel) {
+            console.log(detectionLabel)
+        });
+
     }, [socket])
+
 
 
     return (
@@ -22,7 +29,7 @@ export const Home = () => {
             <div className={'[&>*]:w-full flex flex-col'}>
                 <h1 className={'text-white text-3xl text-center font-medium'}>Live View</h1>
                 <h1 className={'text-white text-base text-center mb-5 font-light'}>Motion was detected x times today</h1>
-                <img src='http://127.0.0.1:5000/video_feed'/>
+                <img id={'img'} src={'https://placeholder.pics/svg/600/DEDEDE/555555/Attempting%20to%20load%20video%20feed...'}/>
                 <div className={'mt-2 mb-8'}>
                     <Button btnText={'Screenshot'}/>
                     <Button btnText={'Activate Buzzer'}/>
