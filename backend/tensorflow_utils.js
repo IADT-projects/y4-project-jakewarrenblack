@@ -2,6 +2,11 @@ const path = require('path');
 
 const cv = require('@u4/opencv4nodejs');
 
+const Jimp = require("jimp");
+const fs = require('fs')
+const qrCode = require('qrcode-reader');
+const util = require("util");
+
 exports.cv = cv;
 
 const dataPath = path.resolve(__dirname, '../data');
@@ -33,13 +38,94 @@ const grabFrames = async (videoFile, delay, onFrame) => {
 };
 exports.grabFrames = grabFrames;
 
+// exports.readQRCode = async () => {
+//   console.log('reading')
+//   const cap = new cv.VideoCapture(0);
+//
+//   //let done = false;
+//   while(true) {
+//     let frame = cap.read();
+//
+//     await Jimp.read(frame.getData()).then((image) => {
+//       let qrcode = new qrCode();
+//       qrcode.callback = function(err, value) {
+//         if (err) {
+//           console.error(err);
+//         }
+//         // Printing the decrypted value
+//         console.log(value.result);
+//       };
+//       // Decoding the QR code
+//       qrcode.decode(image.bitmap);
+//
+//     }).catch((err) => {
+//       console.log(err)
+//     })
+//   }
+// }
+
+
+exports.readQRCode = async () => {
+ // console.log('scanning for QR code')
+  const cap = new cv.VideoCapture(0);
+  let frameReady = true;
+
+  cap.readAsync = util.promisify(cap.read);
+
+  let result;
+
+  const readFrame = async () => {
+    if (frameReady) {
+      frameReady = false;
+
+      const frame = cap.read();
+
+      // jimp expects a buffer, but opencv returns a 'mat' object
+      // convert accordingly
+      const buffer = cv.imencode('.jpg', frame).toString('base64')
+      const image = await Jimp.read(Buffer.from(buffer, 'base64'));
+
+        const qrcode = new qrCode();
+        qrcode.callback = function (err, value) {
+          if (err) {
+            result = err;
+            //console.error(err);
+          }
+          // Printing the decrypted value
+          if(value){
+            //console.log(value.result);
+            result = value.result;
+          }
+
+          frameReady = true;
+
+        };
+        if(image.bitmap) {
+          // Decoding the QR code
+          qrcode.decode(image.bitmap);
+        }
+    }
+
+   // setTimeout(readFrame, 100);
+  };
+
+  return await readFrame().then(() => {
+    return result;
+  })
+};
+
+
+
 exports.runVideoDetection = async (src, detect) => {
+
   let res = await grabFrames(src, 1000, async frame => {
     return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
   })
 
   return res;
 };
+
+
 
 exports.drawRectAroundBlobs = (binaryImg, dstImg, minPxSize, fixedRectWidth) => {
   const {
