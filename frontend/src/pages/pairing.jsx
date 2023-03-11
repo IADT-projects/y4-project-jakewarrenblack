@@ -2,6 +2,7 @@ import {Oval} from 'react-loader-spinner'
 import qr from '../Assets/qr_code.jpg'
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {io} from "socket.io-client";
 
 export const Pairing = () => {
     const [code, setCode] = useState()
@@ -13,6 +14,15 @@ export const Pairing = () => {
             console.log(e)
         })
     }, [])
+
+    const socket = io.connect("http://localhost:3001/");
+
+
+    useEffect(() => {
+
+        socket.emit('pair', 'i want to pair')
+
+    }, [socket])
 
     return (
         <div className={'px-1'}>
