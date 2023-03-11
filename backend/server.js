@@ -19,28 +19,36 @@ const io = new Server(httpServer, { /* options */ });
 
 
 
-// middleware to run when the user is accessing the /api/pair endpoint
+app.use('/api/pair', require('./routes/pair'))
 
-app.use('/api/pair', (req, res, next) => {
-    // locals are available to all routes
-    // if the user is trying to pair, forget about object detection, and focus on reading a QR code
-    req.app.locals.isPairing = true;
+app.use('/', (req, res, next) => {
+    // set isPairing to false for all other endpoints
+    app.locals.isPairing = false
     next();
 });
-
-app.use('/api/pair', require('./routes/pair'))
 
 
 io.on("connection", (socket) => {
     console.log('user connected');  socket.on('disconnect', function () {
         console.log('user disconnected');
     });
+
+    // use this to trigger pairing mode
+    socket.on('pair', () => {
+        console.log('frontend wants to pair')
+        app.locals.isPairing = true
+    })
+
+    app.locals.isPairing = false
 });
 
 let prevLabel;
 let emitCount = 10;
 
+
+
 setInterval(() => {
+
 
     if(!app.locals.isPairing){
         // run object detection
