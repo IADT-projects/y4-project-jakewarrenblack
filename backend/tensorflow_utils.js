@@ -6,6 +6,7 @@ const Jimp = require("jimp");
 const fs = require('fs')
 const qrCode = require('qrcode-reader');
 const util = require("util");
+const {encode} = require("base64-arraybuffer");
 
 exports.cv = cv;
 
@@ -37,32 +38,6 @@ const grabFrames = async (videoFile, delay, onFrame) => {
   }
 };
 exports.grabFrames = grabFrames;
-
-// exports.readQRCode = async () => {
-//   console.log('reading')
-//   const cap = new cv.VideoCapture(0);
-//
-//   //let done = false;
-//   while(true) {
-//     let frame = cap.read();
-//
-//     await Jimp.read(frame.getData()).then((image) => {
-//       let qrcode = new qrCode();
-//       qrcode.callback = function(err, value) {
-//         if (err) {
-//           console.error(err);
-//         }
-//         // Printing the decrypted value
-//         console.log(value.result);
-//       };
-//       // Decoding the QR code
-//       qrcode.decode(image.bitmap);
-//
-//     }).catch((err) => {
-//       console.log(err)
-//     })
-//   }
-// }
 
 
 exports.readQRCode = async () => {
