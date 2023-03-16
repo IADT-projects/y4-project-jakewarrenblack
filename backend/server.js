@@ -9,6 +9,9 @@ const port = process.env.PORT || 3001;
 
 const app = express();
 const cors = require('cors')
+const axios = require("axios");
+const fs = require("fs");
+const {encode} = require("base64-arraybuffer");
 app.use(cors())
 
 const httpServer = createServer(app)
@@ -52,9 +55,15 @@ setInterval(() => {
 
     if(!app.locals.isPairing){
         // run object detection
-        runVideoDetection(0, classifyImg).then((res) => {
+        runVideoDetection(0, classifyImg).then(async (res) => {
+            let image;
+
             if(res.img){
-                io.emit('image', res.img);
+                // was doing it this way: btoa(String.fromCharCode(...new Uint8Array(res.img)));
+                // but caused stack overflow
+                image = encode(res.img) // this is an array buffer until converted to base64
+
+                io.emit('image', image);
             }
 
             if(res.text){
@@ -64,6 +73,29 @@ setInterval(() => {
                 // it will STILL emit if the object it's detecting CHANGES
                 if(res.text.split(' ')[0] !== prevLabel || (emitCount === 0)){
                     io.emit('detection', res.text);
+
+                    // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
+                    if(res.text.split(' ')[0] === 'person'){
+                        console.log('saw a dog')
+
+
+                        await axios({
+                            method: 'POST',
+                            url: 'https://detect.roboflow.com/lola/4',
+                            params: {
+                                api_key: '***REMOVED***'
+                            },
+                            data: image,
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                            }
+                        })
+                        .then((res) => {
+                            console.log(res.data)
+                        }).catch((e) => {
+                            console.log(e.message)
+                        })
+                    }
 
                     // if it's the case that we've emitted an event for this object already, but emitCount is 0, let it emit again, but reset counter
                     emitCount = 10;
