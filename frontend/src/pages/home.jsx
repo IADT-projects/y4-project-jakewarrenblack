@@ -16,6 +16,47 @@ export const Home = () => {
 
         socket.on("detection", function (detectionLabel) {
             console.log(detectionLabel)
+
+            const publicVapidKey = 'BM6G-d8QYWAUCE5C7CKxmSVmEnOgUJzOs-Dml88APJqKoC3Jv9DF2sn9_mTTsz0KHyYArGYkaw4Z7X0fbdKWAKk'
+
+            // Register service worker, register push, send push
+            async function send(){
+                // Register service worker
+                console.log('Registering service worker...')
+                const register = await navigator.serviceWorker.register('../serviceworker.js')
+                console.log('Service worker registered')
+
+                // Register push
+                console.log('Registering push...')
+                const subscription = await register.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: publicVapidKey
+                })
+                console.log('Push registered...')
+
+                // Send a push notification
+                // we send our subscription object to our node backend, via the subscribe route
+                await fetch('http://localhost:3001/subscribe', {
+                    method: 'POST',
+                    body: JSON.stringify(subscription),
+                    headers: {
+                        'content-type': 'application/json'
+                    }
+                })
+
+                console.log('Push sent')
+
+            }
+
+            send().catch(err => console.error(err))
+
+
+
+
+
+
+
+
         });
 
     }, [socket])
