@@ -3,6 +3,10 @@ const { runVideoDetection, readQRCode} = require("./tensorflow_utils");
 const { classifyImg} = require('./tf_detect')
 const { Server } = require("socket.io");
 const {createServer} = require("http");
+
+const webPush = require('web-push')
+const bodyParser = require('body-parser')
+
 require('dotenv').config();
 
 const port = process.env.PORT || 3001;
@@ -12,13 +16,42 @@ const cors = require('cors')
 const axios = require("axios");
 const fs = require("fs");
 const {encode} = require("base64-arraybuffer");
+const path = require("path");
 app.use(cors())
+
+// Set static path
+app.use(express.static(path.join(__dirname, '..', 'frontend')))
+app.use(bodyParser.json())
 
 const httpServer = createServer(app)
 
-const io = new Server(httpServer, { /* options */ });
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['POST', 'GET'],
+    }
+});
 
-//app.use('/api/upload', require('./routes/upload'));
+// Generate these with .\node_modules\.bin\web-push generate-vapid-keys
+// These identify who is sending the push notification
+const publicVapidKey = 'BM6G-d8QYWAUCE5C7CKxmSVmEnOgUJzOs-Dml88APJqKoC3Jv9DF2sn9_mTTsz0KHyYArGYkaw4Z7X0fbdKWAKk'
+const privateVapidKey = '***REMOVED***'
+
+webPush.setVapidDetails('mailto:jakewarrenblack01@gmail.com', publicVapidKey, privateVapidKey)
+
+// Responsible for sending notifications to the service worker
+app.post('/subscribe', (req, res) => {
+    // Get pushSubscription object
+    const subscription = req.body
+
+    res.status(201).json({})
+
+    // Payload is optional
+    const payload = JSON.stringify({title: 'Push test'})
+
+    // Pass that object into sendNotification
+    webPush.sendNotification(subscription, payload).catch((e) => console.error(e))
+})
 
 
 
@@ -75,10 +108,15 @@ setInterval(() => {
                     io.emit('detection', res.text);
 
                     // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
-                    if(res.text.split(' ')[0] === 'person'){
+                    if(res.text.split(' ')[0] === 'dog'){
                         console.log('saw a dog')
 
-
+                        /*
+                         FIXME: waiting for this is possibly causing:
+                         - VideoCapture::Reset - failed to reset capture
+                         - Not sure if this breaks anything, seems to just continue...
+                         - Tested after removing the emit delay
+                         */
                         await axios({
                             method: 'POST',
                             url: 'https://detect.roboflow.com/lola/4',
