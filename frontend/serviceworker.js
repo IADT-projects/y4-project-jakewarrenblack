@@ -48,3 +48,16 @@ self.addEventListener('activate', (event) => {
         ))
     )
 })
+
+self.addEventListener('push', (event) => {
+    // Retrieve the payload
+    const data = event.data.json()
+
+    console.log('push has been received')
+
+    // title received from payload (from the server)
+    self.registration.showNotification(data.title, {
+        body: 'Notified by backend',
+        icon: "./images/logo-01.png"
+    })
+})
