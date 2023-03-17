@@ -1,0 +1,15 @@
+{
+  "short_name": "RAID",
+  "name": "RAID",
+  "icons": [
+    {
+      "src": "/images/logo-01.png",
+      "type": "image/png",
+      "sizes": "1024x1024"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000",
+  "backgroundColor": "#000"
+}

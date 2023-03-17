@@ -3,10 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <link rel="icon" type="image/png" href="./images/logo-01.png">
+    <meta name="theme-color" content="#000">
+    <link rel="apple-touch-icon" href="./images/logo-01.png">
+    <meta name="description" content="Real-time animal identification & deterrence">
+    <link rel="manifest" href="./manifest.json">
+    <title>RAID</title>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <!-- register service worker -->
+    <script>
+      if('serviceWorker' in navigator){
+        // find out if we have access to the serviceWorker
+        window.addEventListener('load', () => {
+          // enables creation of our own service worker. just points to a js file
+          navigator.serviceWorker.register('./serviceworker.js')
+                  .then((reg) => console.log('Success: ', reg.scope)) // show url on which service worker was installed
+                  .catch((err) => console.log('Failure: ', err))
+        })
+      }
+    </script>
+    <script type="module" src="src/main.jsx"></script>
   </body>
 </html>

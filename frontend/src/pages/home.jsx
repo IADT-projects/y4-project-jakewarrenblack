@@ -10,10 +10,8 @@ export const Home = () => {
 
     useEffect(() => {
         // array buffer to base64 encoded string
-        socket.on("image", function (arrayBuffer) {
-            const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-            //console.log(base64String)
-             document.getElementById('img').src = `data:image/jpeg;base64,${base64String}`
+        socket.on("image", function (base64string) {
+             document.getElementById('img').src = `data:image/jpeg;base64,${base64string}`
         });
 
         socket.on("detection", function (detectionLabel) {
