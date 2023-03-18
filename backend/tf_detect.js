@@ -95,8 +95,6 @@ const classifyImg = async img => {
     return returnValue
 };
 
-//runVideoDetection(webcamPort, classifyImg);
-
 module.exports = {
     classifyImg
 }
