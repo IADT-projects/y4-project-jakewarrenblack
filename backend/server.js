@@ -81,11 +81,7 @@ io.on("connection", (socket) => {
 let prevLabel;
 let emitCount = 10;
 
-
-
 setInterval(() => {
-
-
     if(!app.locals.isPairing){
         // run object detection
         runVideoDetection(0, classifyImg).then(async (res) => {
@@ -111,12 +107,6 @@ setInterval(() => {
                     if(res.text.split(' ')[0] === 'dog'){
                         console.log('saw a dog')
 
-                        /*
-                         FIXME: waiting for this is possibly causing:
-                         - VideoCapture::Reset - failed to reset capture
-                         - Not sure if this breaks anything, seems to just continue...
-                         - Tested after removing the emit delay
-                         */
                         await axios({
                             method: 'POST',
                             url: 'https://detect.roboflow.com/lola/4',

@@ -1,7 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const qr = require('qrcode')
 
-
 const generateQRCode = (req, res) => {
     // Generate a unique code
     const uuid = uuidv4();
@@ -16,10 +15,6 @@ const generateQRCode = (req, res) => {
         // Send the code to the frontend as a QR code
         res.send(url)
     });
-
-
-    
-
 }
 
 

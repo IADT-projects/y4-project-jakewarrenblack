@@ -21,7 +21,7 @@ const grabFrames = async (videoFile, delay, onFrame) => {
     let frame = cap.read();
 
     if (frame.empty) {
-      cap.reset();
+      await cap.reset();
       frame = cap.read();
     }
 
@@ -92,11 +92,9 @@ exports.readQRCode = async () => {
 
 
 exports.runVideoDetection = async (src, detect) => {
-
   let res = await grabFrames(src, 1000, async frame => {
     return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
   })
-
   return res;
 };
 
