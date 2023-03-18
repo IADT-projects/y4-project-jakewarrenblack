@@ -6,7 +6,7 @@ const Jimp = require("jimp");
 const fs = require('fs')
 const qrCode = require('qrcode-reader');
 const util = require("util");
-const {encode} = require("base64-arraybuffer");
+const { v4: uuidv4 } = require('uuid');
 
 exports.cv = cv;
 
@@ -14,14 +14,31 @@ const dataPath = path.resolve(__dirname, '../data');
 exports.dataPath = dataPath;
 exports.getDataFilePath = fileName => path.resolve(dataPath, fileName);
 
+const capture = new cv.VideoCapture(0, cv.CAP_V4L2);
+
 const grabFrames = async (videoFile, delay, onFrame) => {
-  const cap = new cv.VideoCapture(videoFile);
+  
   //let done = false;
   while(true) {
-    let frame = cap.read();
+    let frame = capture.read();
+
+
+    // create the frames directory if it doesn't exist
+    // const framesDir = './frames';
+    // if (!fs.existsSync(framesDir)) {
+    //     fs.mkdirSync(framesDir);
+    // }
+
+
+    // const filePath = path.join(framesDir, `frame_${uuidv4()}.jpg`);
+    // cv.imwrite(filePath, frame);
+
+
+
+
 
     if (frame.empty) {
-      await cap.reset();
+      cap.reset();
       frame = cap.read();
     }
 
@@ -38,6 +55,32 @@ const grabFrames = async (videoFile, delay, onFrame) => {
   }
 };
 exports.grabFrames = grabFrames;
+
+// exports.readQRCode = async () => {
+//   console.log('reading')
+//   const cap = new cv.VideoCapture(0);
+//
+//   //let done = false;
+//   while(true) {
+//     let frame = cap.read();
+//
+//     await Jimp.read(frame.getData()).then((image) => {
+//       let qrcode = new qrCode();
+//       qrcode.callback = function(err, value) {
+//         if (err) {
+//           console.error(err);
+//         }
+//         // Printing the decrypted value
+//         console.log(value.result);
+//       };
+//       // Decoding the QR code
+//       qrcode.decode(image.bitmap);
+//
+//     }).catch((err) => {
+//       console.log(err)
+//     })
+//   }
+// }
 
 
 exports.readQRCode = async () => {
@@ -92,9 +135,11 @@ exports.readQRCode = async () => {
 
 
 exports.runVideoDetection = async (src, detect) => {
+
   let res = await grabFrames(src, 1000, async frame => {
     return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
   })
+
   return res;
 };
 
