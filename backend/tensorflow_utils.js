@@ -32,7 +32,8 @@ const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! image/jpeg.wid
 */
 
 
-// seems reasonably fast: const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
+// seems reasonably fast: 
+const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
 
 const grabFrames = async (videoFile, delay, onFrame) => {
   

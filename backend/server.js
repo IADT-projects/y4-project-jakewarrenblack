@@ -7,6 +7,8 @@ const {createServer} = require("http");
 const webPush = require('web-push')
 const bodyParser = require('body-parser')
 
+const {buzz} = require('./buzz')
+
 require('dotenv').config();
 
 const port = process.env.PORT || 3001;
@@ -104,7 +106,8 @@ setInterval(() => {
                     io.emit('detection', res.text);
 
                     // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
-                    if(res.text.split(' ')[0] === 'dog'){
+                    if(res.text.split(' ')[0] === 'person'){
+                        buzz()
                         console.log('saw a dog')
 
                         await axios({
