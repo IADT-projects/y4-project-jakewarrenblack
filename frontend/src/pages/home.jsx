@@ -5,7 +5,7 @@ import {io} from 'socket.io-client'
 
 export const Home = () => {
     //connect to the socket server.
-    const socket = io.connect("http://localhost:3001/");
+    const socket = io.connect("http://192.168.1.25:3001/");
 
 
     useEffect(() => {
@@ -71,7 +71,13 @@ export const Home = () => {
                 <img id={'img'} src={'https://placeholder.pics/svg/600/DEDEDE/555555/Attempting%20to%20load%20video%20feed...'}/>
                 <div className={'mt-2 mb-8'}>
                     <Button btnText={'Screenshot'}/>
-                    <Button btnText={'Activate Buzzer'}/>
+                    <Button onClick={() => {
+
+                        axios.get(`http://192.168.1.25:3001/api/buzz`).then((res) => {
+                            console.log(res)
+                        }).catch((e) => console.error(e))
+
+                    }} btnText={'Activate Buzzer'}/>
                 </div>
             </div>
         </div>
