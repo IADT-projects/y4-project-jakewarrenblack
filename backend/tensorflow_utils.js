@@ -14,28 +14,32 @@ const dataPath = path.resolve(__dirname, '../data');
 exports.dataPath = dataPath;
 exports.getDataFilePath = fileName => path.resolve(dataPath, fileName);
 
-const capture = new cv.VideoCapture(0, cv.CAP_V4L2);
+
+// Various attempts at improving speed/framerate:
+
+/*
+gstreamer pipeline = v4l2src ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink
+
+this works, but is slow: const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
+
+const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=320,height=240,framerate=30/1 ! appsink')
+
+gst-launch-1.0 -vvv v4l2src device=/dev/video0 ! 'video/x-raw,framerate=30/1,format=UYVY' ! v4l2h264enc ! 'video/x-h264,level=(string)4' ! decodebin ! videoconvert ! appsink
+
+trying to use the GPU, doesn't work: const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! videoconvert ! omxh264enc ! video/x-h264,profile=high ! appsink')
+
+const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! image/jpeg.width=640,height=480,framerate=30/1 ! jpegdec ! videoconvert ! appsink')
+*/
+
+
+// seems reasonably fast: const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
 
 const grabFrames = async (videoFile, delay, onFrame) => {
   
   //let done = false;
-  while(true) {
+  while(true) {    
+    
     let frame = capture.read();
-
-
-    // create the frames directory if it doesn't exist
-    // const framesDir = './frames';
-    // if (!fs.existsSync(framesDir)) {
-    //     fs.mkdirSync(framesDir);
-    // }
-
-
-    // const filePath = path.join(framesDir, `frame_${uuidv4()}.jpg`);
-    // cv.imwrite(filePath, frame);
-
-
-
-
 
     if (frame.empty) {
       cap.reset();
@@ -55,32 +59,6 @@ const grabFrames = async (videoFile, delay, onFrame) => {
   }
 };
 exports.grabFrames = grabFrames;
-
-// exports.readQRCode = async () => {
-//   console.log('reading')
-//   const cap = new cv.VideoCapture(0);
-//
-//   //let done = false;
-//   while(true) {
-//     let frame = cap.read();
-//
-//     await Jimp.read(frame.getData()).then((image) => {
-//       let qrcode = new qrCode();
-//       qrcode.callback = function(err, value) {
-//         if (err) {
-//           console.error(err);
-//         }
-//         // Printing the decrypted value
-//         console.log(value.result);
-//       };
-//       // Decoding the QR code
-//       qrcode.decode(image.bitmap);
-//
-//     }).catch((err) => {
-//       console.log(err)
-//     })
-//   }
-// }
 
 
 exports.readQRCode = async () => {
