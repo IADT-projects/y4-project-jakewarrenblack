@@ -7,7 +7,7 @@ const {createServer} = require("http");
 const webPush = require('web-push')
 const bodyParser = require('body-parser')
 
-const {buzz} = require('./buzz')
+const {buzz, noBuzz} = require('./buzz')
 
 require('dotenv').config();
 
@@ -59,6 +59,8 @@ app.post('/subscribe', (req, res) => {
 
 app.use('/api/pair', require('./routes/pair'))
 
+app.use('/api/buzz', require('./routes/buzz'))
+
 app.use('/', (req, res, next) => {
     // set isPairing to false for all other endpoints
     app.locals.isPairing = false
@@ -83,15 +85,8 @@ io.on("connection", (socket) => {
 let prevLabel;
 let emitCount = 10;
 
-// const execSync = require('child_process').execSync
-// let cmd = () => execSync('node buzz.js')
-
-const buzzer = () => {
-    buzz()
-}
-
-
 setInterval(() => {
+
     if(!app.locals.isPairing){
         // run object detection
         runVideoDetection(0, classifyImg).then(async (res) => {
@@ -115,9 +110,6 @@ setInterval(() => {
 
                     // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
                     if(res.text.split(' ')[0] === 'person'){
-                        //buzzing = true;
-                        //cmd()
-                        buzzer()
                         console.log('saw a dog')
 
                         await axios({
@@ -131,8 +123,13 @@ setInterval(() => {
                                 "Content-Type": "application/x-www-form-urlencoded",
                             }
                         })
-                        .then((res) => {
+                        .then(async (res) => {
                             console.log(res.data)
+
+                            // no prediction, or less than 75% confident of prediction
+                            // if(!res.data.predictions.length || res.data.predictions.confidence < 0.75){
+                            //     shouldBuzz = true;
+                            // }
                         }).catch((e) => {
                             console.log(e.message)
                         })
