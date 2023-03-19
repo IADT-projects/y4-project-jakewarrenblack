@@ -83,6 +83,14 @@ io.on("connection", (socket) => {
 let prevLabel;
 let emitCount = 10;
 
+// const execSync = require('child_process').execSync
+// let cmd = () => execSync('node buzz.js')
+
+const buzzer = () => {
+    buzz()
+}
+
+
 setInterval(() => {
     if(!app.locals.isPairing){
         // run object detection
@@ -107,7 +115,9 @@ setInterval(() => {
 
                     // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
                     if(res.text.split(' ')[0] === 'person'){
-                        buzz()
+                        //buzzing = true;
+                        //cmd()
+                        buzzer()
                         console.log('saw a dog')
 
                         await axios({
