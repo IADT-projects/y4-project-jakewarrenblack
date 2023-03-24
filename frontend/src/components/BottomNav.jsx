@@ -2,6 +2,7 @@ import {MdHomeFilled} from 'react-icons/md'
 import {MdDashboard} from 'react-icons/md'
 import {MdPets} from 'react-icons/md'
 import {MdSettings} from 'react-icons/md'
+import {Link} from 'react-router-dom'
 
 // TODO: Refine some aspects of this. Icon size. Font size. Font weight. Spacing, both horizontal and vertical. Change colour based on selected route.
 
@@ -13,7 +14,7 @@ const BottomNav = () => {
             icon: <MdHomeFilled/>
         },
         {
-            iconName: 'Dashboard',
+            iconName: 'Captures',
             icon: <MdDashboard/>
         },
         {
@@ -36,10 +37,10 @@ const BottomNav = () => {
     }
 
     return (
-        <div className={'absolute left-0 bottom-0 w-screen flex justify-around mt-2 font-light bg-white py-2'}>
+        <div className={'fixed left-0 bottom-0 w-screen flex justify-around mt-2 font-light bg-white py-2'}>
             {
                 icons.map((icon) => {
-                    return <Icon {...icon}/>
+                    return <Link to={icon.iconName === 'Home' && '/' || icon.iconName.toLowerCase()}><Icon {...icon}/></Link>
                 })
             }
         </div>
