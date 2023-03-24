@@ -1,7 +1,7 @@
 const path = require('path');
-
+const {encode} = require("base64-arraybuffer");
 const cv = require('@u4/opencv4nodejs');
-
+const axios = require('axios')
 const Jimp = require("jimp");
 const fs = require('fs')
 const qrCode = require('qrcode-reader');
@@ -35,7 +35,7 @@ const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! image/jpeg.wid
 // seems reasonably fast: 
 const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
 
-const grabFrames = async (videoFile, delay, onFrame) => {
+const grabFrames = async (videoFile, delay) => {
   
   //let done = false;
   while(true) {    
@@ -47,8 +47,85 @@ const grabFrames = async (videoFile, delay, onFrame) => {
       frame = cap.read();
     }
 
+//	const buffer = cv.imencode('.jpg', frame).toString('base64')
+//	const jimpImage = await Jimp.read(Buffer.from(buffer, 'base64'));
+
+//	const cvimg = cv.imdecode(Buffer.from(buffer,'base64'))
+
+//	const image = fs.readFileSync(cvimg, {
+//	    encoding: "base64"
+//	});
+
+
+
     // Call the onFrame callback and wait for it to complete
-    const result = await onFrame(frame);
+    //const result = await onFrame(frame)
+
+	let result;
+
+//	let encodedFrame = encode(frame)
+
+	let axiosimage = cv.imencode('.jpg', frame)
+	axiosimage = encode(axiosimage)
+
+	await axios({
+	    method: "POST",
+	    url: "http://localhost:9001/cats_dogs_and_wild_animals/1",
+	    params: {
+        	api_key: "NotZ49lvMpo1QwEINQgR"
+	    },
+	    data: axiosimage,
+	    headers: {
+        	"Content-Type": "application/x-www-form-urlencoded"
+	    }
+	})
+	.then(function(response) {
+	  	console.log(response.data);
+		//result = response.data;
+
+		let pred =response.data.predictions[0]
+
+		let x1 = pred.x
+		let y1 = pred.y
+		let x2 = pred.width
+		let y2 = pred.height
+		let predClass = pred['class']
+		let conf = pred.confidence
+
+		// take result and draw bounding box/label to image
+		const pt1 = new cv.Point(x1, y1);
+               const pt2 = new cv.Point(x2, y2);
+            const rectColor = new cv.Vec(23, 230, 210);
+            const rectThickness = 2;
+            const rectLineType = cv.LINE_8;
+
+            // draw the rect for the object
+            img.drawRectangle(pt1, pt2, rectColor, rectThickness, rectLineType);
+
+            text = `${predClass} ${conf.toFixed(5)}`;
+            const org = new cv.Point(x1, y1 + 15);
+            const fontFace = cv.FONT_HERSHEY_SIMPLEX;
+            const fontScale = 0.5;
+            const textColor = new cv.Vec(255, 0, 0);
+            const thickness = 2;
+
+            // put text on the object
+            img.putText(text, org, fontFace, fontScale, textColor, thickness);
+
+
+		result = {
+		'img': cv.imencode('.jpg',img),
+		'text':predClass
+		}
+	})
+	.catch(function(error) {
+	    console.log(error.message);
+		result = {
+			'img':cv.imencode('.jpg',frame),
+			'text':''
+		}
+	});
+
 
     if (result) {
       return result;
@@ -115,11 +192,14 @@ exports.readQRCode = async () => {
 
 exports.runVideoDetection = async (src, detect) => {
 
-  let res = await grabFrames(src, 1000, async frame => {
-    return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
-  })
+//  let res = await grabFrames(src, 1000, async frame => {
+  //  return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
+//  })
 
-  return res;
+
+return  await grabFrames(src, 1000)
+
+  //return res;
 };
 
 

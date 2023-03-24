@@ -109,7 +109,7 @@ setInterval(() => {
                     io.emit('detection', res.text);
 
                     // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
-                    if(res.text.split(' ')[0] === 'person'){
+                    if(res.text.split(' ')[0] === 'dog'){
                         console.log('saw a dog')
 
                         await axios({

@@ -1,0 +1,11 @@
+--2023-03-24 20:00:56--  https://townsquare.media/site/40/files/2017/03/Dog-.jpg?w=1200
+Resolving townsquare.media (townsquare.media)... 192.229.233.181
+Connecting to townsquare.media (townsquare.media)|192.229.233.181|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 104476 (102K) [image/jpeg]
+Saving to: ‘Dog-.jpg?w=1200’
+
+Dog-.jpg?w=1200                            0%[                                                                                   ]       0  --.-KB/s               Dog-.jpg?w=1200                          100%[==================================================================================>] 102.03K  --.-KB/s    in 0.1s    
+
+2023-03-24 20:00:57 (682 KB/s) - ‘Dog-.jpg?w=1200’ saved [104476/104476]
+
