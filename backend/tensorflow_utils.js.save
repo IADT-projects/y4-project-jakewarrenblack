@@ -35,7 +35,7 @@ const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! image/jpeg.wid
 // seems reasonably fast: 
 const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
 
-const grabFrames = async (videoFile, delay) => {
+const grabFrames = async (videoFile, delay, onFrame) => {
   
   //let done = false;
   while(true) {    
@@ -47,14 +47,12 @@ const grabFrames = async (videoFile, delay) => {
       frame = cap.read();
     }
 
-//	const buffer = cv.imencode('.jpg', frame).toString('base64')
-//	const jimpImage = await Jimp.read(Buffer.from(buffer, 'base64'));
+	  const buffer = cv.imencode('.jpg', frame).toString('base64')
+	  const jimpImage = await Jimp.read(Buffer.from(buffer, 'base64'));
 
-//	const cvimg = cv.imdecode(Buffer.from(buffer,'base64'))
-
-//	const image = fs.readFileSync(cvimg, {
-//	    encoding: "base64"
-//	});
+	const image = fs.readFileSync(buffer, {
+    enco	ding: "base64"
+	});
 
 
 
@@ -63,80 +61,31 @@ const grabFrames = async (videoFile, delay) => {
 
 	let result;
 
-//	let encodedFrame = encode(frame)
+	let encodedFrame = encode(frame)
 
-	let axiosimage = cv.imencode('.jpg', frame)
-	axiosimage = encode(axiosimage)
-
-
-        // url: "http://localhost:9001/cats_dogs_and_wild_animals/1",
-        // params: {
-        //   api_key: "NotZ49lvMpo1QwEINQgR"
-
-        await axios({
-          method: "POST",
-          url: "http://localhost:9001/cats_dogs_and_wild_animals/1",
-          params: {
-            api_key: "NotZ49lvMpo1QwEINQgR"
-          },
-          data: axiosimage,
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        }).then(function(response) {
-          console.log(response.data);
-        
-          let pred = response.data.predictions[0];
-        
-          // convert decimal coordinates to pixel coordinates
-          const imageWidth = response.data.image.width;
-          const imageHeight = response.data.image.height;
-          let x1 = Math.round(pred.x * imageWidth);
-          let y1 = Math.round(pred.y * imageHeight);
-          let x2 = Math.round(pred.width * imageWidth);
-          let y2 = Math.round(pred.height * imageHeight);
-        
-          let predClass = pred['class'];
-          let conf = pred.confidence;
-        
-          // draw bounding box and label on the image
-          const pt1 = new cv.Point(x1, y1);          
-          const pt2 = new cv.Point(x1 + x2, y1 + y2);
-          const rectColor = new cv.Vec(23, 230, 210);
-          const rectThickness = 2;
-          const rectLineType = cv.LINE_8;
-        
-          img.drawRectangle(pt1, pt2, rectColor, rectThickness, rectLineType);
-        
-          let text = `${predClass} ${conf.toFixed(5)}`;
-          const org = new cv.Point(x1, y1 + 15);
-          const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-          const fontScale = 0.5;
-          const textColor = new cv.Vec(255, 0, 0);
-          const thickness = 2;
-        
-          img.putText(text, org, fontFace, fontScale, textColor, thickness);
-        
-          // encode the image after drawing the bounding box and label on it
-          const encodedImg = cv.imencode('.jpg', img);
-        
-          result = {
-            'img': encodedImg,
-            'text': predClass
-          }
-        }).catch(function(error) {
-          console.log(error.message);
-          result = {
-            'img': cv.imencode('.jpg', frame),
-            'text': ''
-          }
-        });
-        
-        if (result) {
-          return result;
-        }
+	await axios({
+	    method: "POST",
+	    url: "http://localhost:9001/cats_dogs_and_wild_animals/1",
+	    params: {
+        	api_key: "NotZ49lvMpo1QwEINQgR"
+	    },
+	    data: image,
+	    headers: {
+        	"Content-Type": "application/x-www-form-urlencoded"
+	    }
+	})
+	.then(function(response) {
+	  	console.log(response.data);
+		result = response.data;
+	})
+	.catch(function(error) {
+	    console.log(error.message);
+	});
 
 
+    if (result) {
+      return result;
+    }
 
     // Delay before reading the next frame
     await new Promise(resolve => setTimeout(resolve, delay));
@@ -199,13 +148,11 @@ exports.readQRCode = async () => {
 
 exports.runVideoDetection = async (src, detect) => {
 
-//  let res = await grabFrames(src, 1000, async frame => {
-  //  return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
-//  })
+  let res = await grabFrames(src, 1000, async frame => {
+    return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
+  })
 
-let res = await grabFrames(src, 1000)
-
-return res;  
+  return res;
 };
 
 

@@ -95,7 +95,8 @@ setInterval(() => {
             if(res.img){
                 // was doing it this way: btoa(String.fromCharCode(...new Uint8Array(res.img)));
                 // but caused stack overflow
-                image = encode(res.img) // this is an array buffer until converted to base64
+                image = encode(res.img.buffer) // this is an array buffer until converted to base64
+
 
                 io.emit('image', image);
             }
