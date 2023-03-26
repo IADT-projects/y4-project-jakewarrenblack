@@ -7,7 +7,6 @@ export const Home = () => {
     //connect to the socket server.
     const socket = io.connect("http://192.168.15.199:3001/");
 
-
     useEffect(() => {
         // array buffer to base64 encoded string
         socket.on("image", function (base64string) {
@@ -45,18 +44,9 @@ export const Home = () => {
                 })
 
                 console.log('Push sent')
-
             }
 
             send().catch(err => console.error(err))
-
-
-
-
-
-
-
-
         });
 
     }, [socket])
