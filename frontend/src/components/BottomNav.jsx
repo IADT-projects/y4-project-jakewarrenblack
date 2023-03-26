@@ -37,7 +37,7 @@ const BottomNav = () => {
     }
 
     return (
-        <div className={'fixed left-0 bottom-0 w-screen flex justify-around mt-2 font-light bg-white py-2'}>
+        <div className={'h-[65px] fixed left-0 bottom-0 w-screen flex justify-around mt-2 font-light bg-white py-2'}>
             {
                 icons.map((icon) => {
                     return <Link to={icon.iconName === 'Home' && '/' || icon.iconName.toLowerCase()}><Icon {...icon}/></Link>
