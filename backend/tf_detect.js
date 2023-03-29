@@ -1,95 +1,119 @@
-
 const fs = require("fs");
 const path = require("path");
-const classNames = require("./data/dnnTensorflowObjectDetectionClassNames");
-const { cv, runVideoDetection } = require("./tensorflow_utils.js");
+const { cv, runVideoDetection } = require("./tensorflow_utils");
 
 if (!cv.xmodules.dnn) {
     throw new Error("exiting: opencv4nodejs compiled without dnn module");
 }
 
-// replace with path where you unzipped detection model
-const detectionModelPath = "./data/";
+// replace with path where you unzipped darknet model
+const darknetPath = "./data/yolov4";
 
-const pbFile = path.resolve(detectionModelPath, "frozen_inference_graph.pb");
-const pbtxtFile = path.resolve(
-    detectionModelPath,
-    "ssd_mobilenet_v2_coco_2018_03_29.pbtxt"
-);
+const cfgFile = path.resolve(darknetPath, "yolov4-tiny-custom.cfg");
+const weightsFile = path.resolve(darknetPath, "yolov4-tiny-custom_best.weights");
+const labelsFile = path.resolve(darknetPath, "obj.names");
 
-if (!fs.existsSync(pbFile) || !fs.existsSync(pbtxtFile)) {
-    console.log("could not find detection model");
-    console.log(
-        "download the model from: https://github.com/opencv/opencv/wiki/TensorFlow-Object-Detection-API#use-existing-config-file-for-your-model"
-    );
-    throw new Error("exiting");
-}
 
-// set webcam port
-const webcamPort = 0;
+const minConfidence = 0.5;
+const nmsThreshold = 0.3;
+
+// read classNames and store them in an array
+const labels = fs
+    .readFileSync(labelsFile)
+    .toString()
+    .split("\n");
 
 // initialize tensorflow darknet model from modelFile
-const net = cv.readNetFromTensorflow(pbFile, pbtxtFile);
+const net = cv.readNetFromDarknet(cfgFile, weightsFile);
+const allLayerNames = net.getLayerNames();
+const unconnectedOutLayers = net.getUnconnectedOutLayers();
 
-const classifyImg = async img => {
-    // object detection model works with 300 x 300 images
-    const size = new cv.Size(300, 300);
+// determine only the *output* layer names that we need from YOLO
+const layerNames = unconnectedOutLayers.map(layerIndex => {
+    return allLayerNames[layerIndex - 1];
+});
+
+const classifyImg = img => {
+    // object detection model works with 416 x 416 images
+    const size = new cv.Size(416, 416);
     const vec3 = new cv.Vec(0, 0, 0);
+    const [imgHeight, imgWidth] = img.sizes;
 
     // network accepts blobs as input
-    const inputBlob = cv.blobFromImage(img, 1, size, vec3, true, true);
+    const inputBlob = cv.blobFromImage(img, 1 / 255.0, size, vec3, true, false);
     net.setInput(inputBlob);
 
-    //console.time("net.forward");
-    // forward pass input through entire network, will return
-    // classification result as 1x1xNxM Mat
-    const outputBlob = net.forward();
-    //console.timeEnd("net.forward");
+    // forward pass input through entire network
+    const layerOutputs = net.forward(layerNames);
 
-    // get height and width from the image
-    const [imgHeight, imgWidth] = img.sizes;
-    const numRows = outputBlob.sizes.slice(2, 3);
+    let boxes = [];
+    let confidences = [];
+    let classIDs = [];
 
     let text;
 
-    for (let y = 0; y < numRows; y += 1) {
-        const confidence = outputBlob.at([0, 0, y, 2]);
-        if (confidence > 0.5) {
-            const classId = outputBlob.at([0, 0, y, 1]);
-            const className = classNames[classId];
-            const boxX = imgWidth * outputBlob.at([0, 0, y, 3]);
-            const boxY = imgHeight * outputBlob.at([0, 0, y, 4]);
-            const boxWidht = imgWidth * outputBlob.at([0, 0, y, 5]);
-            const boxHeight = imgHeight * outputBlob.at([0, 0, y, 6]);
+    layerOutputs.forEach(mat => {
+        const output = mat.getDataAsArray();
+        output.forEach(detection => {
+            const scores = detection.slice(5);
+            const classId = scores.indexOf(Math.max(...scores));
+            const confidence = scores[classId];
 
-            const pt1 = new cv.Point(boxX, boxY);
-            const pt2 = new cv.Point(boxWidht, boxHeight);
-            const rectColor = new cv.Vec(23, 230, 210);
-            const rectThickness = 2;
-            const rectLineType = cv.LINE_8;
+            if (confidence > minConfidence) {
+                const box = detection.slice(0, 4);
 
-            // draw the rect for the object
-            img.drawRectangle(pt1, pt2, rectColor, rectThickness, rectLineType);
+                const centerX = parseInt(box[0] * imgWidth);
+                const centerY = parseInt(box[1] * imgHeight);
+                const width = parseInt(box[2] * imgWidth);
+                const height = parseInt(box[3] * imgHeight);
 
-            text = `${className} ${confidence.toFixed(5)}`;
-            const org = new cv.Point(boxX, boxY + 15);
-            const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-            const fontScale = 0.5;
-            const textColor = new cv.Vec(255, 0, 0);
-            const thickness = 2;
+                const x = parseInt(centerX - width / 2);
+                const y = parseInt(centerY - height / 2);
 
-            // put text on the object
-            img.putText(text, org, fontFace, fontScale, textColor, thickness);
-        }
-    }
+                boxes.push(new cv.Rect(x, y, width, height));
+                confidences.push(confidence);
+                classIDs.push(classId);
+
+                const indices = cv.NMSBoxes(
+                    boxes,
+                    confidences,
+                    minConfidence,
+                    nmsThreshold
+                );
+
+                indices.forEach(i => {
+                    const rect = boxes[i];
+
+                    const pt1 = new cv.Point(rect.x, rect.y);
+                    const pt2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+                    const rectColor = new cv.Vec(255, 0, 0);
+                    const rectThickness = 2;
+                    const rectLineType = cv.LINE_8;
+
+                    // draw the rect for the object
+                    img.drawRectangle(pt1, pt2, rectColor, rectThickness, rectLineType);
+
+                    text = labels[classIDs[i]];
+                    const org = new cv.Point(rect.x, rect.y + 15);
+                    const fontFace = cv.FONT_HERSHEY_SIMPLEX;
+                    const fontScale = 0.5;
+                    const textColor = new cv.Vec(123, 123, 255);
+                    const thickness = 2;
+
+                    // put text on the object
+                    img.putText(text, org, fontFace, fontScale, textColor, thickness);
+                });
+            }
+        });
+    });
 
     let returnValue;
 
     text ? returnValue = {
-        'img': cv.imencode('.jpg', img),
-        'text': text
-    } : {
-        'img': cv.imencode('.jpg', img),
+      'img': cv.imencode('.jpg', img),
+      'text': text
+    } : returnValue = {
+      'img': cv.imencode('.jpg', img),
     }
 
     return returnValue

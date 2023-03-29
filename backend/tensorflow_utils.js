@@ -1,12 +1,10 @@
 const path = require('path');
-
 const cv = require('@u4/opencv4nodejs');
-
 const Jimp = require("jimp");
-const fs = require('fs')
 const qrCode = require('qrcode-reader');
 const util = require("util");
 const { v4: uuidv4 } = require('uuid');
+const os = require("os");
 
 exports.cv = cv;
 
@@ -33,7 +31,20 @@ const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! image/jpeg.wid
 
 
 // seems reasonably fast: 
-const capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
+let capture;
+
+// Intend to try this pipeline:
+// "v4l2src ! video/x-raw, width=1280, height=400, format=GRAY8 \
+// ! videoconvert ! video/x-raw, format=I420 ! v4l2h264enc ! video/x-h264, \
+// stream-format=byte-stream, alignment=au ! h264parse ! rtph264pay name=pay0 pt=96"
+
+if(os.platform() === 'linux'){
+  capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
+}
+else{
+  capture = new cv.VideoCapture(0)
+}
+
 
 const grabFrames = async (videoFile, delay, onFrame) => {
   
