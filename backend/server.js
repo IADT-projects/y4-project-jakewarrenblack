@@ -7,8 +7,6 @@ const {createServer} = require("http");
 const webPush = require('web-push')
 const bodyParser = require('body-parser')
 
-const {buzz, noBuzz} = require('./buzz')
-
 require('dotenv').config();
 
 const port = process.env.PORT || 3001;
@@ -16,9 +14,10 @@ const port = process.env.PORT || 3001;
 const app = express();
 const cors = require('cors')
 const axios = require("axios");
-const fs = require("fs");
 const {encode} = require("base64-arraybuffer");
 const path = require("path");
+const isPi = require('detect-rpi');
+
 app.use(cors())
 
 // Set static path
@@ -55,11 +54,14 @@ app.post('/subscribe', (req, res) => {
     webPush.sendNotification(subscription, payload).catch((e) => console.error(e))
 })
 
-
-
 app.use('/api/pair', require('./routes/pair'))
 
-app.use('/api/buzz', require('./routes/buzz'))
+if(isPi()){
+    app.use('/api/buzz', require('./routes/buzz'))
+}
+else{
+    console.info('\nNote the /buzz endpoint is only available when the server is running on the Raspberry Pi.\n')
+}
 
 app.use('/', (req, res, next) => {
     // set isPairing to false for all other endpoints

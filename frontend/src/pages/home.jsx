@@ -4,8 +4,11 @@ import axios from "axios";
 import {io} from 'socket.io-client'
 
 export const Home = () => {
+    const serverURL = `http://localhost:3001`
+    const publicVapidKey = 'BM6G-d8QYWAUCE5C7CKxmSVmEnOgUJzOs-Dml88APJqKoC3Jv9DF2sn9_mTTsz0KHyYArGYkaw4Z7X0fbdKWAKk'
+
     //connect to the socket server.
-    const socket = io.connect("http://192.168.15.199:3001/");
+    const socket = io.connect(serverURL);
 
     useEffect(() => {
         // array buffer to base64 encoded string
@@ -13,10 +16,10 @@ export const Home = () => {
              document.getElementById('img').src = `data:image/jpeg;base64,${base64string}`
         });
 
-        socket.on("detection", function (detectionLabel) {
+            socket.on("detection", function (detectionLabel) {
             console.log(detectionLabel)
 
-            const publicVapidKey = 'BM6G-d8QYWAUCE5C7CKxmSVmEnOgUJzOs-Dml88APJqKoC3Jv9DF2sn9_mTTsz0KHyYArGYkaw4Z7X0fbdKWAKk'
+
 
             // Register service worker, register push, send push
             async function send(){
@@ -35,7 +38,7 @@ export const Home = () => {
 
                 // Send a push notification
                 // we send our subscription object to our node backend, via the subscribe route
-                await fetch('http://localhost:3001/subscribe', {
+                await fetch(`${serverURL}/subscribe`, {
                     method: 'POST',
                     body: JSON.stringify(subscription),
                     headers: {
@@ -63,7 +66,7 @@ export const Home = () => {
                     <Button btnText={'Screenshot'}/>
                     <Button onClick={() => {
 
-                        axios.get(`http://192.168.15.199:3001/api/buzz`).then((res) => {
+                        axios.get(`${serverURL}/api/buzz`).then((res) => {
                             console.log(res)
                         }).catch((e) => console.error(e))
 
