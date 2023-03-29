@@ -1,6 +1,6 @@
 const express = require("express");
-const { runVideoDetection, readQRCode} = require("./tensorflow_utils");
-const { classifyImg} = require('./tf_detect')
+const { runVideoDetection, readQRCode} = require("./utils");
+const { classifyImg} = require('./detect')
 const { Server } = require("socket.io");
 const {createServer} = require("http");
 
