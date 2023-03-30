@@ -12,7 +12,7 @@ export const Home = () => {
 
     useEffect(() => {
         // array buffer to base64 encoded string
-        socket.on("image", function (base64string) {
+        socket.on("sendImage", function (base64string) {
              document.getElementById('img').src = `data:image/jpeg;base64,${base64string}`
         });
 
