@@ -26,7 +26,7 @@ const socketServer = new Server(httpServer, {
 
 
 
-const serverURL = 'http://localhost:3001'
+const serverURL = 'https://raid-middleman.herokuapp.com/'
 const socketClient = io.connect(serverURL);
 
 // socketClient.on("connection", function (base64string) {
