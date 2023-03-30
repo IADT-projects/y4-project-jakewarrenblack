@@ -1,0 +1,3 @@
+[submodule "backend/raid-middleman-server"]
+	path = backend/raid-middleman-server
+	url = https://github.com/jakewarrenblack/raid-middleman-server
