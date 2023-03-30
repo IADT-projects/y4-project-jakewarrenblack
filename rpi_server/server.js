@@ -72,9 +72,9 @@ setInterval(() => {
             //
             //             await axios({
             //                 method: 'POST',
-            //                 url: 'https://detect.roboflow.com/lola/4',
+            //                 url: process.env.ROBOFLOW_API_KEY,
             //                 params: {
-            //                     api_key: '***REMOVED***'
+            //                     api_key: 'NotZ49lvMpo1QwEINQgR'
             //                 },
             //                 data: image,
             //                 headers: {
