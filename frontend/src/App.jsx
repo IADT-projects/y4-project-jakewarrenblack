@@ -15,7 +15,7 @@ function App() {
     const [user, setUser] = useState(null)
     useEffect(() => {
         const getUser = () => {
-            fetch("http://localhost:3001/api/auth/login/success", {
+            fetch("https://raid-middleman.herokuapp.com/api/auth/login/success", {
                 method: "GET",
                 credentials: "include",
                 headers: {

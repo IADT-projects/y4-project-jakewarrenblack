@@ -56,7 +56,7 @@ const PrivacyPolicy = () => {
 }
 
 const logout = () => {
-    window.open('http://localhost:3001/api/auth/logout', '_self')
+    window.open('https://raid-middleman.herokuapp.com/api/auth/logout', '_self')
 }
 
 
