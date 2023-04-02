@@ -6,6 +6,10 @@ const app = express();
 const cors = require('cors')
 const axios = require("axios");
 const { io } = require("socket.io-client");
+const cookieSession = require("cookie-session");
+const passport = require("passport");
+const passportSetup = require('./passport')
+const path = require('path')
 
 const port = process.env.PORT || 3001;
 
@@ -24,13 +28,22 @@ const socketServer = new Server(httpServer, {
 
 
 
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(cookieSession({
+    name: 'session',
+    keys:['test'],
+    maxAge: 24 * 60 * 60 * 100 // 1 day
+}))
+
+app.use(passport.initialize(undefined))
+app.use(passport.session(undefined))
+
 app.use('/api/pair', require('./routes/pair'))
-
 app.use('/api/buzz', require('./routes/buzz'))
-
-app.use('/api/feed', require('./routes/feed'))
-
-let img; // reference most recently received image
+app.use('/api/auth', require('./routes/auth_routes'))
 
 
 socketServer.on("connection", (socket) => {
@@ -45,12 +58,6 @@ socketServer.on("connection", (socket) => {
     })
 
     socket.on('receiveImage', (data) => {
-        //console.log('Received image:', data)
-
-        // I could also set this img variable and provide access to it through a REST endpoint like /feed
-        // Not sure if that would be too slow compared to using SocketIO directly
-        //img = data;
-
         socketServer.emit('sendImage', data);
     })
 
