@@ -2,12 +2,13 @@ import {Input} from "../components/Input";
 import {Button} from "../components/Button";
 import {Link} from "react-router-dom";
 import Markdown from 'markdown-to-jsx';
-import React from 'react';
+import React, {useContext} from 'react';
 import { render } from 'react-dom';
 
 
 import {useEffect, useState} from "react";
 import ReactMarkdown from "react-markdown";
+import {UserContext} from "../utils/user_context";
 
 const PrivacyPolicy = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -36,6 +37,8 @@ const PrivacyPolicy = () => {
         },
     };
 
+
+
     return (
         <>
             {
@@ -50,16 +53,27 @@ const PrivacyPolicy = () => {
             }
         </>
     )
-
-
 }
+
+const logout = () => {
+    window.open('http://localhost:3001/api/auth/logout', '_self')
+}
+
+
+
 export const Settings = () => {
+    const {user, setUser} = useContext(UserContext)
 
     return (
         <div className={'px-1 bg-navy'}>
             <h1 className={'text-white'}>Settings</h1>
+            {user && <div className={'flex items-center'}>
+                <img className={'h-10'} src={user.photos[0].value}/>
+                <h1 className={'text-white ml-2'}>{user.displayName}</h1>
+            </div>}
             <br/>
             <PrivacyPolicy/>
+            <h1 className={'text-white'} onClick={logout}>Logout</h1>
 
         </div>
     )

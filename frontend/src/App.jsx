@@ -9,10 +9,43 @@ import {Pairing} from "./pages/pairing";
 import {Captures} from "./pages/captures";
 import {Pets} from "./pages/pets";
 import {Settings} from "./pages/settings";
+import {UserContext} from "./utils/user_context";
 
 function App() {
+    const [user, setUser] = useState(null)
+    useEffect(() => {
+        const getUser = () => {
+            fetch("http://localhost:3001/api/auth/login/success", {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Credentials": true,
+                },
+            })
+                .then((response) => {
+                    if (response.status === 200) return response.json();
+                    throw new Error("authentication has been failed!");
+                })
+                .then((resObject) => {
+                    console.log(resObject.user)
+                    setUser(resObject.user);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        };
+        getUser();
+    }, []);
 
   return (
+    <UserContext.Provider value={
+        {
+            user,
+            setUser
+        }
+    }>
     <Router>
         {/* Height of container fills screen but excludes bottom navigation in its height */}
         <div className={'w-full flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2 bg-navy'}>
@@ -28,6 +61,7 @@ function App() {
         </div>
         <BottomNav/>
     </Router>
+    </UserContext.Provider>
   );
 }
 

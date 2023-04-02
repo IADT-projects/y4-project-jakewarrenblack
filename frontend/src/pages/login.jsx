@@ -5,6 +5,9 @@ import axios from "axios";
 
 export const Login = () => {
 
+    const google = () => {
+        window.open('http://localhost:3001/api/auth/google')
+    }
 
     return (
         <div className={'px-1'}>
@@ -13,13 +16,7 @@ export const Login = () => {
                 <Input label={'email'} type={'email'}/>
                 <Input label={'password'} type={'password'}/>
                 <Button btnText={'Login'}/>
-                <Button onClick={() => {
-                    console.log('LOGIN CLICk')
-                    axios.get('http://localhost:3001/api/auth/login/federated/google').then((res) => {
-                        console.log(res)
-                    }).catch((e) => console.error(e))
-
-                }} btnText={'Sign in with Google'}/>
+                <Button onClick={() => google()} btnText={'Sign in with Google'}/>
             </form>
             <p className={'underline text-cyberYellow mt-3 font-medium'}>Create an account</p>
         </div>
