@@ -10,10 +10,13 @@ const cookieSession = require("cookie-session");
 const passport = require("passport");
 const passportSetup = require('./passport')
 const path = require('path')
+const db = require('./utils/db')()
 
 const port = process.env.PORT || 3001;
 
 app.use(cors())
+
+app.use(express.json());
 
 const httpServer = createServer(app)
 
@@ -30,20 +33,20 @@ const socketServer = new Server(httpServer, {
 
 
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(cookieSession({
-    name: 'session',
-    keys:['test'],
-    maxAge: 24 * 60 * 60 * 100 // 1 day
-}))
-
-app.use(passport.initialize(undefined))
-app.use(passport.session(undefined))
+// app.use(express.static(path.join(__dirname, 'public')));
+//
+// app.use(cookieSession({
+//     name: 'session',
+//     keys:['test'],
+//     maxAge: 24 * 60 * 60 * 100 // 1 day
+// }))
+//
+// app.use(passport.initialize(undefined))
+// app.use(passport.session(undefined))
 
 app.use('/api/pair', require('./routes/pair'))
 app.use('/api/buzz', require('./routes/buzz'))
-app.use('/api/auth', require('./routes/auth_routes'))
+app.use('/api/auth', require('./routes/auth'))
 
 
 socketServer.on("connection", (socket) => {

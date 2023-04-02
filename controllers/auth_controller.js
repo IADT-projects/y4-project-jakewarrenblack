@@ -1,0 +1,64 @@
+const bcrypt = require('bcryptjs')
+const User = require('../models/user_schema')
+const jwt = require('jsonwebtoken')
+
+const register = (req, res) => {
+    let newUser = new User(req.body);
+    newUser.password = bcrypt.hashSync(req.body.password, 10);
+
+    newUser.save().then((user, err) => {
+        if (err) {
+            return res.status(400).json({
+                msg: err,
+            });
+        } else {
+            user.password = undefined;
+            return res.status(201).json(user);
+        }
+    }).catch((err)=>{
+        res.status(500).json({
+            msg: err
+        })
+    })
+};
+
+const login = (req, res) => {
+
+    User.findOne({
+        email: req.body.email,
+    })
+    .then((user) => {
+        if (!user || !user.comparePassword(req.body.password)) {
+            res.status(401).json({
+                msg: "Authentication failed. Invalid user or password",
+            });
+        } else {
+            // token receives object, whatever you put here is encoded inside the token
+            let token = jwt.sign(
+                {
+                    email: user.email,
+                    name: user.name,
+                    _id: user._id,
+                },
+                process.env.APP_KEY
+            );
+
+            res.status(200).json({
+                msg: "All good",
+                // below outputs as 'token: token'
+                token,
+            });
+        }
+    })
+    .catch((err) => {
+        throw err;
+    });
+};
+
+const logout = (req, res) => {}
+
+module.exports = {
+    login,
+    register,
+    logout
+}
