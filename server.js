@@ -11,6 +11,8 @@ const passport = require("passport");
 const passportSetup = require('./passport')
 const path = require('path')
 const db = require('./utils/db')()
+const session = require('express-session')
+const flash = require('express-flash')
 
 const port = process.env.PORT || 3001;
 
@@ -29,8 +31,18 @@ const socketServer = new Server(httpServer, {
     }
 });
 
+const {initialisePassport} = require('./passport-config')
+initialisePassport(passport)
 
+// app.use(flash())
+app.use(session({
+    secret: process.env['SESSION_SECRET'],
+    resave: false, // dont resave session variables if nothing has changed
+    saveUninitialized: false // dont save empty values in the session
+}))
 
+app.use(passport.initialize())
+app.use(passport.session()) // for storing variables across the user's entire session
 
 
 // app.use(express.static(path.join(__dirname, 'public')));
@@ -47,6 +59,14 @@ const socketServer = new Server(httpServer, {
 app.use('/api/pair', require('./routes/pair'))
 app.use('/api/buzz', require('./routes/buzz'))
 app.use('/api/auth', require('./routes/auth'))
+
+
+const checkAuthenticated = (req,res,next) => {
+    if(req.isAuthenticated()){
+        return next()
+    }
+    res.redirect('http://localhost:3000/home')
+}
 
 
 socketServer.on("connection", (socket) => {
