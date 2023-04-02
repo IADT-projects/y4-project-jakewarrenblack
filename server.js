@@ -61,6 +61,12 @@ app.use('/api/buzz', require('./routes/buzz'))
 app.use('/api/auth', require('./routes/auth'))
 
 
+app.get('/test', (req, res) => {
+    res.status(200).json({
+        msg: req.user
+    })
+})
+
 const checkAuthenticated = (req,res,next) => {
     if(req.isAuthenticated()){
         return next()

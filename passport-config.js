@@ -1,6 +1,7 @@
 const LocalStrategy = require('passport-local').Strategy
 const User = require('./models/user_schema')
 const bcrypt = require('bcryptjs')
+const mongoose = require("mongoose");
 
 
 const initialisePassport = (passport) => {
@@ -36,8 +37,12 @@ const initialisePassport = (passport) => {
 
 
     passport.serializeUser((user, done) => done(null, user.id))
-    passport.deserializeUser((id, done) => {
-        return done(null, User.findById({id}))
+    passport.deserializeUser(async (id, done) => {
+        let mongoID = new mongoose.mongo.ObjectId(id);
+
+        let user = await User.findOne( { "_id": mongoID } )
+
+        return done(null, user)
     })
 
 }
