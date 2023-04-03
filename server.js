@@ -8,7 +8,6 @@ const axios = require("axios");
 const { io } = require("socket.io-client");
 const cookieSession = require("cookie-session");
 const passport = require("passport");
-const passportSetup = require('./passport')
 const path = require('path')
 const db = require('./utils/db')()
 const session = require('express-session')
@@ -22,7 +21,6 @@ app.use(express.json());
 
 const httpServer = createServer(app)
 
-
 // We send socket events to the client
 const socketServer = new Server(httpServer, {
     cors: {
@@ -34,7 +32,6 @@ const socketServer = new Server(httpServer, {
 const {initialisePassport} = require('./passport-config')
 initialisePassport(passport)
 
-// app.use(flash())
 app.use(session({
     secret: process.env['SESSION_SECRET'],
     resave: false, // dont resave session variables if nothing has changed
@@ -44,17 +41,6 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session()) // for storing variables across the user's entire session
 
-
-// app.use(express.static(path.join(__dirname, 'public')));
-//
-// app.use(cookieSession({
-//     name: 'session',
-//     keys:['test'],
-//     maxAge: 24 * 60 * 60 * 100 // 1 day
-// }))
-//
-// app.use(passport.initialize(undefined))
-// app.use(passport.session(undefined))
 
 app.use('/api/pair', require('./routes/pair'))
 app.use('/api/buzz', require('./routes/buzz'))
@@ -67,11 +53,35 @@ app.get('/test', (req, res) => {
     })
 })
 
+
+
+
+
 const checkAuthenticated = (req,res,next) => {
     if(req.isAuthenticated()){
         return next()
     }
     res.redirect('http://localhost:3000/home')
+}
+
+const jwt = require('jsonwebtoken');
+
+function requireAuth(req, res, next) {
+    // Get the JWT from the Authorization header
+    const token = req.headers.authorization.split(' ')[1];
+
+    // Verify the JWT
+    jwt.verify(token, 'secret', (err, decodedToken) => {
+        if (err) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+
+        // The JWT is valid - add the user ID to the request object
+        req.userId = decodedToken.userId;
+
+        // Call the next middleware function
+        next();
+    });
 }
 
 

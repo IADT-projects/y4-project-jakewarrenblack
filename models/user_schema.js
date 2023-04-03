@@ -1,16 +1,18 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
+const findOrCreate = require("mongoose-findorcreate");
 
 // note db properties use snake_case by convention
 const userSchema = Schema(
     {
         name: {
             type: String,
-            required: [true, "name is required"],
+        },
+        googleId: {
+            type: String
         },
         email: {
             type: String,
-            required: [true, "Email is required"],
             // mongoose will provide an error for us just by adding this
             unique: [true, "Email already exists"],
             // will make emails lowercase
@@ -19,11 +21,28 @@ const userSchema = Schema(
         },
         password: {
             type: String,
-            required: [true, "Password is required"],
         },
+        photo: {
+            type: String,
+        }
+
     },
     { timestamps: true }
 );
+
+// Before saving a user, I want to find out if they've provided a googleID
+// If so, they don't need to give a username and password
+userSchema.pre('save', async function(next) {
+    if (!this.googleId) {
+        if (!this.password) {
+            return next(new Error('Password is required.'));
+        }
+        if (!this.email) {
+            return next(new Error('Email is required.'));
+        }
+    }
+    next();
+});
 
 
 
@@ -32,5 +51,10 @@ userSchema.methods.comparePassword = function (password) {
         return result; // returns true or false
     });
 };
+
+
+
+userSchema.plugin(findOrCreate)
+
 
 module.exports = model("User", userSchema);
