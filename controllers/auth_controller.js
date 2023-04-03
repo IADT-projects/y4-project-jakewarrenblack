@@ -1,64 +1,83 @@
 const bcrypt = require('bcryptjs')
 const User = require('../models/user_schema')
 const jwt = require('jsonwebtoken')
+const passport = require("passport");
 
 const register = (req, res) => {
-    let newUser = new User(req.body);
-    newUser.password = bcrypt.hashSync(req.body.password, 10);
-
-    newUser.save().then((user, err) => {
+    User.register(new User({ email: req.body.email, username: req.body.username }), req.body.password, function (err, user) {
         if (err) {
-            return res.status(400).json({
-                msg: err,
-            });
-        } else {
-            user.password = undefined;
-            return res.status(201).json(user);
+            res.json({ success: false, message: "Your account could not be saved. Error: " + err });
         }
-    }).catch((err)=>{
-        res.status(500).json({
-            msg: err
-        })
-    })
-};
-
-const login = (req, res) => {
-
-    User.findOne({
-        email: req.body.email,
-    })
-    .then((user) => {
-        if (!user || !user.comparePassword(req.body.password)) {
-            res.status(401).json({
-                msg: "Authentication failed. Invalid user or password",
-            });
-        } else {
-            // token receives object, whatever you put here is encoded inside the token
-            let token = jwt.sign(
-                {
-                    email: user.email,
-                    name: user.name,
-                    _id: user._id,
-                },
-                process.env.APP_KEY
-            );
-
-            res.status(200).json({
-                msg: "All good",
-                // below outputs as 'token: token'
-                token,
-            });
+        else {
+            req.login(user, (err) => {
+                if (err) {
+                    res.json({ success: false, message: err });
+                }
+                else {
+                    res.json({ success: true, message: "Your account has been saved" });
+                }
+            })
         }
-    })
-    .catch((err) => {
-        throw err;
     });
 };
 
-const logout = (req, res) => {}
+
+
+const login = (req, res) => {
+    if (!req.body.username) {
+        res.json({ success: false, message: "Username was not given" })
+    }
+    else if (!req.body.password) {
+        res.json({ success: false, message: "Password was not given" })
+    }
+    else {
+        passport.authenticate("local", function (err, user, info) {
+            if (err) {
+                res.json({ success: false, message: err });
+            }
+            else {
+                if (!user) {
+                    res.json({ success: false, message: "username or password incorrect" });
+                }
+                else {
+                    const token = jwt.sign({ userId: user._id, username: user.username }, process.env['APP_KEY'], { expiresIn: "24h" });
+                    res.json({ success: true, message: "Authentication successful", token: token });
+                }
+            }
+        })(req, res);
+    }
+
+};
+
+const logout = (req, res) => {
+    req.logout()
+
+    res.status(200).json({
+        msg: 'logged out'
+    })
+
+
+}
+
+
+const getUser = (req, res) => {
+    if(req.user){
+        res.status(200).json({
+            msg: req.user
+        })
+    }
+    else{
+        res.status(500).json({
+            msg: 'No user in the session'
+        })
+    }
+}
+
+
 
 module.exports = {
     login,
     register,
-    logout
+    logout,
+    getUser
 }

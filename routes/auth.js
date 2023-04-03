@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const {login, register, logout} = require('../controllers/auth_controller')
+const {login, register, logout, getUser} = require('../controllers/auth_controller')
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-
 router
-    .post("/login", passport.authenticate('local'), login)
+    .post('/login', login)
+    .get('/user', getUser)
     .post("/register", register)
-    .post("/logout", logout)
+    .get("/logout", logout)
     .get('/google', passport.authenticate('google', { scope: ['profile'] }))
     .get('/google/callback',
         passport.authenticate('google', { failureRedirect: 'http://localhost:3000' }),

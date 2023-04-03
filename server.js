@@ -6,7 +6,6 @@ const app = express();
 const cors = require('cors')
 const axios = require("axios");
 const { io } = require("socket.io-client");
-const cookieSession = require("cookie-session");
 const passport = require("passport");
 const path = require('path')
 const db = require('./utils/db')()
@@ -31,12 +30,13 @@ const socketServer = new Server(httpServer, {
 
 const {initialisePassport} = require('./passport-config')
 initialisePassport(passport)
-
+//
 app.use(session({
     secret: process.env['SESSION_SECRET'],
-    resave: false, // dont resave session variables if nothing has changed
-    saveUninitialized: false // dont save empty values in the session
-}))
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: true }
+}));
 
 app.use(passport.initialize())
 app.use(passport.session()) // for storing variables across the user's entire session

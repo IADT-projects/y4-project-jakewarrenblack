@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
 const findOrCreate = require("mongoose-findorcreate");
+const passportLocalMongoose = require('passport-local-mongoose');
 
 // note db properties use snake_case by convention
 const userSchema = Schema(
@@ -19,9 +20,6 @@ const userSchema = Schema(
             lowercase: true,
             trim: true,
         },
-        password: {
-            type: String,
-        },
         photo: {
             type: String,
         }
@@ -34,9 +32,6 @@ const userSchema = Schema(
 // If so, they don't need to give a username and password
 userSchema.pre('save', async function(next) {
     if (!this.googleId) {
-        if (!this.password) {
-            return next(new Error('Password is required.'));
-        }
         if (!this.email) {
             return next(new Error('Email is required.'));
         }
@@ -45,15 +40,7 @@ userSchema.pre('save', async function(next) {
 });
 
 
-
-userSchema.methods.comparePassword = function (password) {
-    return bcrypt.compareSync(password, this.password, function (result) {
-        return result; // returns true or false
-    });
-};
-
-
-
+userSchema.plugin(passportLocalMongoose)
 userSchema.plugin(findOrCreate)
 
 
