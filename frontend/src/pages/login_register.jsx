@@ -2,9 +2,16 @@ import {Input} from "../components/Input";
 import {Button} from "../components/Button";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {useContext} from 'react'
+import {AuthContext} from '../utils/AuthContext'
 
 export const LoginRegister = () => {
+    const { loadMe} = useContext(AuthContext);
+
     const [loginSelected, setLoginSelected] = useState(true)
+
+    // when you login with google, the x-auth-token will be set as a cookie by the server,
+    // but for normal username/pw login, we send the token as a response in JSON
 
     const Form = () => {
         const content = () => {
@@ -20,10 +27,13 @@ export const LoginRegister = () => {
                         <Button onClick={(e) => {
                             e.preventDefault()
                             axios.post(`http://localhost:3001/api/auth/login`, {
-                                email: 'test@teeee.com',
-                                password: 'abcd'
-                            }).then(r => console.log(r))
-                                .catch(e => console.error(e))
+                                username: 'miggeldy',
+                                password: 'test'
+                            }).then(res => {
+                                console.log(res)
+                                    loadMe(res.data.token)
+                            })
+                            .catch(e => console.error(e))
                         }} btnText={'Login'}/>
                     </>
                 )

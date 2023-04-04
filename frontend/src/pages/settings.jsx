@@ -4,11 +4,9 @@ import {Link} from "react-router-dom";
 import Markdown from 'markdown-to-jsx';
 import React, {useContext} from 'react';
 import { render } from 'react-dom';
-
-
 import {useEffect, useState} from "react";
 import ReactMarkdown from "react-markdown";
-import {UserContext} from "../utils/UserContext";
+import {AuthContext} from '../utils/AuthContext'
 
 const PrivacyPolicy = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -63,14 +61,14 @@ const logout = () => {
 
 
 export const Settings = () => {
-    const {user, setUser} = useContext(UserContext)
+    const {user} = useContext(AuthContext)
 
     return (
         <div className={'px-1 bg-navy'}>
             <h1 className={'text-white'}>Settings</h1>
             {user && <div className={'flex items-center'}>
-                <img className={'h-10'} src={user.photos[0].value}/>
-                <h1 className={'text-white ml-2'}>{user.displayName}</h1>
+                {/*<img className={'h-10'} src={user.photos[0].value}/>*/}
+                <h1 className={'text-white ml-2'}>{user.username}</h1>
             </div>}
             <br/>
             <PrivacyPolicy/>

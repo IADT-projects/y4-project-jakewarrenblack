@@ -8,44 +8,33 @@ import {Pairing} from "./pages/pairing";
 import {Captures} from "./pages/captures";
 import {Pets} from "./pages/pets";
 import {Settings} from "./pages/settings";
-import {UserContext} from "./utils/UserContext";
+import {AuthContext} from "./utils/AuthContext";
+import {AuthProvider} from './utils/AuthContext'
 import ProtectedRoute from "./components/ProtectedRoute";
+import Cookies from 'js-cookie';
 
 function App() {
-    const [user, setUser] = useState(null)
+    // const { loading, error, logInUserWithOauth } = useContext(AuthContext);
+    //
     // useEffect(() => {
-    //     const getUser = () => {
-    //         fetch("http://localhost:3001/api/auth/login/success", {
-    //             method: "GET",
-    //             credentials: "include",
-    //             headers: {
-    //                 Accept: "application/json",
-    //                 "Content-Type": "application/json",
-    //                 "Access-Control-Allow-Credentials": true,
-    //             },
-    //         })
-    //             .then((response) => {
-    //                 if (response.status === 200) return response.json();
-    //                 throw new Error("authentication failed!");
-    //             })
-    //             .then((resObject) => {
-    //                 console.log(resObject.user)
-    //                 setUser(resObject.user);
-    //             })
-    //             .catch((err) => {
-    //                 console.log(err);
-    //             });
-    //     };
-    //     getUser();
+    //     const cookieJwt = Cookies.get('x-auth-cookie');
+    //     if (cookieJwt) {
+    //         Cookies.remove('x-auth-cookie');
+    //         logInUserWithOauth(cookieJwt);
+    //     }
+    //     else{
+    //         console.log('No cookie in session')
+    //     }
     // }, []);
 
+    // useEffect(() => {
+    //     if (!auth.appLoaded && !auth.isLoading && auth.token && !auth.isAuthenticated) {
+    //         loadMe();
+    //     }
+    // }, [auth.isAuthenticated, auth.token, loadMe, auth.isLoading, auth.appLoaded]);
+
   return (
-    <UserContext.Provider value={
-        {
-            user,
-            setUser
-        }
-    }>
+    <AuthProvider>
     <Router>
         {/* Height of container fills screen but excludes bottom navigation in its height */}
         <div className={'w-full flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2 bg-navy'}>
@@ -62,7 +51,7 @@ function App() {
         </div>
         <BottomNav/>
     </Router>
-    </UserContext.Provider>
+    </AuthProvider>
   );
 }
 
