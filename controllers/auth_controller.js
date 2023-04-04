@@ -41,7 +41,7 @@ const login = (req, res) => {
                 }
                 else {
                     const token = jwt.sign({ userId: user._id, username: user.username }, process.env['APP_KEY'], { expiresIn: "24h" });
-                    res.json({ success: true, message: "Authentication successful", token: token });
+                    res.status(200).json({ success: true, message: "Authentication successful", token: token });
                 }
             }
         })(req, res);

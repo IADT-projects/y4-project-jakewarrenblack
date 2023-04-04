@@ -39,9 +39,8 @@ userSchema.pre('save', async function(next) {
     next();
 });
 
-
-userSchema.plugin(passportLocalMongoose)
 userSchema.plugin(findOrCreate)
+userSchema.plugin(passportLocalMongoose)
 
 
 module.exports = model("User", userSchema);

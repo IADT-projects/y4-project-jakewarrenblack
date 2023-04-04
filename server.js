@@ -9,8 +9,6 @@ const { io } = require("socket.io-client");
 const passport = require("passport");
 const path = require('path')
 const db = require('./utils/db')()
-const session = require('express-session')
-const flash = require('express-flash')
 
 const port = process.env.PORT || 3001;
 
@@ -30,31 +28,13 @@ const socketServer = new Server(httpServer, {
 
 const {initialisePassport} = require('./passport-config')
 initialisePassport(passport)
-//
-app.use(session({
-    secret: process.env['SESSION_SECRET'],
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true }
-}));
 
 app.use(passport.initialize())
-app.use(passport.session()) // for storing variables across the user's entire session
 
 
 app.use('/api/pair', require('./routes/pair'))
 app.use('/api/buzz', require('./routes/buzz'))
 app.use('/api/auth', require('./routes/auth'))
-
-
-app.get('/test', (req, res) => {
-    res.status(200).json({
-        msg: req.user
-    })
-})
-
-
-
 
 
 const checkAuthenticated = (req,res,next) => {
@@ -64,25 +44,6 @@ const checkAuthenticated = (req,res,next) => {
     res.redirect('http://localhost:3000/home')
 }
 
-const jwt = require('jsonwebtoken');
-
-function requireAuth(req, res, next) {
-    // Get the JWT from the Authorization header
-    const token = req.headers.authorization.split(' ')[1];
-
-    // Verify the JWT
-    jwt.verify(token, 'secret', (err, decodedToken) => {
-        if (err) {
-            return res.status(401).json({ message: 'Invalid token' });
-        }
-
-        // The JWT is valid - add the user ID to the request object
-        req.userId = decodedToken.userId;
-
-        // Call the next middleware function
-        next();
-    });
-}
 
 
 socketServer.on("connection", (socket) => {
