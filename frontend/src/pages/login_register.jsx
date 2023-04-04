@@ -4,11 +4,6 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 
 export const LoginRegister = () => {
-
-    const google = () => {
-        window.open('http://localhost:3001/api/auth/google')
-    }
-
     const [loginSelected, setLoginSelected] = useState(true)
 
     const Form = () => {
@@ -18,8 +13,18 @@ export const LoginRegister = () => {
                     <>
                         <Input label={'Email'} type={'email'}/>
                         <Input label={'Password'} type={'password'}/>
-                        <Button onClick={() => google()} btnText={'Sign in with Google'}/>
-                        <Button btnText={'Login'}/>
+                        <Button onClick={(e) => {
+                            e.preventDefault()
+                            window.location.href = 'http://localhost:3001/api/auth/google'
+                        }} btnText={'Sign in with Google'}/>
+                        <Button onClick={(e) => {
+                            e.preventDefault()
+                            axios.post(`http://localhost:3001/api/auth/login`, {
+                                email: 'test@teeee.com',
+                                password: 'abcd'
+                            }).then(r => console.log(r))
+                                .catch(e => console.error(e))
+                        }} btnText={'Login'}/>
                     </>
                 )
             }

@@ -8,7 +8,7 @@ import { render } from 'react-dom';
 
 import {useEffect, useState} from "react";
 import ReactMarkdown from "react-markdown";
-import {UserContext} from "../utils/user_context";
+import {UserContext} from "../utils/UserContext";
 
 const PrivacyPolicy = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -56,6 +56,7 @@ const PrivacyPolicy = () => {
 }
 
 const logout = () => {
+
     window.open('https://raid-middleman.herokuapp.com/api/auth/logout', '_self')
 }
 
@@ -73,7 +74,12 @@ export const Settings = () => {
             </div>}
             <br/>
             <PrivacyPolicy/>
-            <h1 className={'text-white'} onClick={logout}>Logout</h1>
+            <h1 className={'text-white'} onClick={() => {
+                // Clear the context first
+                setUser(null)
+                // Then actually log out
+                logout()
+            }}>Logout</h1>
 
         </div>
     )

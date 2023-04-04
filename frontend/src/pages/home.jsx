@@ -22,34 +22,34 @@ export const Home = () => {
 
 
             // Register service worker, register push, send push
-            async function send(){
-                // Register service worker
-                console.log('Registering service worker...')
-                const register = await navigator.serviceWorker.register('../serviceworker.js')
-                console.log('Service worker registered')
-
-                // Register push
-                console.log('Registering push...')
-                const subscription = await register.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: publicVapidKey
-                })
-                console.log('Push registered...')
-
-                // Send a push notification
-                // we send our subscription object to our node backend, via the subscribe route
-                await fetch(`${serverURL}/subscribe`, {
-                    method: 'POST',
-                    body: JSON.stringify(subscription),
-                    headers: {
-                        'content-type': 'application/json'
-                    }
-                })
-
-                console.log('Push sent')
-            }
-
-            send().catch(err => console.error(err))
+            // async function send(){
+            //     // Register service worker
+            //     console.log('Registering service worker...')
+            //     const register = await navigator.serviceWorker.register('../serviceworker.js')
+            //     console.log('Service worker registered')
+            //
+            //     // Register push
+            //     console.log('Registering push...')
+            //     const subscription = await register.pushManager.subscribe({
+            //         userVisibleOnly: true,
+            //         applicationServerKey: publicVapidKey
+            //     })
+            //     console.log('Push registered...')
+            //
+            //     // Send a push notification
+            //     // we send our subscription object to our node backend, via the subscribe route
+            //     await fetch(`${serverURL}/subscribe`, {
+            //         method: 'POST',
+            //         body: JSON.stringify(subscription),
+            //         headers: {
+            //             'content-type': 'application/json'
+            //         }
+            //     })
+            //
+            //     console.log('Push sent')
+            // }
+            //
+            // send().catch(err => console.error(err))
         });
 
     }, [socket])
