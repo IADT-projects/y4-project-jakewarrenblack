@@ -8,14 +8,14 @@ export const Pairing = () => {
     const [code, setCode] = useState()
 
     useEffect(() => {
-        axios.get(`http://localhost:3001/api/pair/`).then((res) => {
+        axios.get(`http://localhost:5000/api/pair/`).then((res) => {
             setCode(res.data)
         }).catch((e) => {
             console.log(e)
         })
     }, [])
 
-    const socket = io.connect("http://localhost:3001/");
+    const socket = io.connect("http://localhost:5000/");
 
 
     useEffect(() => {

@@ -1,7 +1,10 @@
-import React, {useEffect, useRef, useState} from "react";
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import axios from "axios";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {BrowserRouter as Router, Route, Routes, useNavigate} from 'react-router-dom';
+import Cookies from 'js-cookie';
+
+import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
+
 import {Home} from "./pages/home";
 import {LoginRegister} from "./pages/login_register";
 import {Pairing} from "./pages/pairing";
@@ -9,33 +12,33 @@ import {Captures} from "./pages/captures";
 import {Pets} from "./pages/pets";
 import {Settings} from "./pages/settings";
 import {AuthContext} from "./utils/AuthContext";
-import {AuthProvider} from './utils/AuthContext'
-import ProtectedRoute from "./components/ProtectedRoute";
-import Cookies from 'js-cookie';
+
+
 
 function App() {
-    // const { loading, error, logInUserWithOauth } = useContext(AuthContext);
-    //
-    // useEffect(() => {
-    //     const cookieJwt = Cookies.get('x-auth-cookie');
-    //     if (cookieJwt) {
-    //         Cookies.remove('x-auth-cookie');
-    //         logInUserWithOauth(cookieJwt);
-    //     }
-    //     else{
-    //         console.log('No cookie in session')
-    //     }
-    // }, []);
 
-    // useEffect(() => {
-    //     if (!auth.appLoaded && !auth.isLoading && auth.token && !auth.isAuthenticated) {
-    //         loadMe();
-    //     }
-    // }, [auth.isAuthenticated, auth.token, loadMe, auth.isLoading, auth.appLoaded]);
+    // So when user refreshes page, check for a token, and just log them in again
+    const {loginUserWithOauth} = useContext(AuthContext)
+    const navigate = useNavigate()
+
+    useEffect(async () => {
+        const cookieJwt = Cookies.get('x-auth-cookie');
+        if (cookieJwt) {
+            await loginUserWithOauth(cookieJwt)
+                .then((res) => {
+                    navigate('/home')
+                })
+                .catch((e) => {
+                    console.log(e)
+                })
+        }
+        else{
+            console.log('No cookie in session')
+        }
+    }, []);
 
   return (
-    <AuthProvider>
-    <Router>
+    <>
         {/* Height of container fills screen but excludes bottom navigation in its height */}
         <div className={'w-full flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2 bg-navy'}>
             <Routes>
@@ -50,8 +53,7 @@ function App() {
             </Routes>
         </div>
         <BottomNav/>
-    </Router>
-    </AuthProvider>
+    </>
   );
 }
 

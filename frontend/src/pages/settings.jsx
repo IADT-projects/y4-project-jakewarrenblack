@@ -1,12 +1,14 @@
 import {Input} from "../components/Input";
 import {Button} from "../components/Button";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import Markdown from 'markdown-to-jsx';
 import React, {useContext} from 'react';
 import { render } from 'react-dom';
 import {useEffect, useState} from "react";
 import ReactMarkdown from "react-markdown";
 import {AuthContext} from '../utils/AuthContext'
+import axios from "axios";
+import Cookies from 'js-cookie'
 
 const PrivacyPolicy = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -53,30 +55,25 @@ const PrivacyPolicy = () => {
     )
 }
 
-const logout = () => {
-
-    window.open('https://raid-middleman.herokuapp.com/api/auth/logout', '_self')
-}
-
-
-
 export const Settings = () => {
-    const {user} = useContext(AuthContext)
+    const {user, setUser, clearAllValues} = useContext(AuthContext)
+    const navigate = useNavigate()
 
     return (
         <div className={'px-1 bg-navy'}>
             <h1 className={'text-white'}>Settings</h1>
             {user && <div className={'flex items-center'}>
-                {/*<img className={'h-10'} src={user.photos[0].value}/>*/}
+                {user.photo && <img className={'h-10'} src={`${user.photo}`}/>}
                 <h1 className={'text-white ml-2'}>{user.username}</h1>
             </div>}
             <br/>
             <PrivacyPolicy/>
             <h1 className={'text-white'} onClick={() => {
                 // Clear the context first
-                setUser(null)
-                // Then actually log out
-                logout()
+                clearAllValues()
+                axios.get(`http://localhost:5000/api/auth/logout`).then((res) => {
+                    navigate('/')
+                })
             }}>Logout</h1>
 
         </div>
