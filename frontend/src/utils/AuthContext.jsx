@@ -7,7 +7,7 @@ export const AuthContext = createContext();
 export const AuthProvider = (props) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const attachTokenToHeaders = (token) => {
@@ -27,7 +27,7 @@ export const AuthProvider = (props) => {
     const clearAllValues = () => {
         setUser(null);
         setToken(null);
-        setLoading(true);
+        setLoading(false);
         setError(null);
         Cookies.remove('x-auth-cookie');
     }
@@ -57,13 +57,8 @@ export const AuthProvider = (props) => {
     }
 
 
-    const ping = () => {
-        axios.get('http://localhost:5000/api/auth/ping')
-            .then((res) => console.log(res))
-            .catch((e) => console.log(e))
-    }
-
-
+    // I promisified this one so I can use .then on it, and redirect once finished.
+    // Don't need to do that for the oauth login since the server will redirect you.
     const loginUserWithEmail = async (formData, location) => {
         setLoading(true);
         setError(null);
@@ -145,13 +140,7 @@ export const AuthProvider = (props) => {
         });
     };
 
-    const something = () => {
-        console.log('test')
-    }
-
     const authContextValues = {
-        ping,
-        something,
         user,
         setUser,
         token,

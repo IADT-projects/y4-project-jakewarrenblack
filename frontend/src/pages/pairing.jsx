@@ -3,6 +3,7 @@ import qr from '../Assets/qr_code.jpg'
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {io} from "socket.io-client";
+import {Loader} from "../components/Loader";
 
 export const Pairing = () => {
     const [code, setCode] = useState()
@@ -29,18 +30,7 @@ export const Pairing = () => {
             <h1 className={'text-white text-4xl text-center font-semibold mb-5'}>Show this code to the Raspberry Pi</h1>
             <img className={'p-2 w-full'} src={code || qr}/>
             <div className={'flex justify-center mt-5 flex-col items-center'}>
-                <Oval
-                    height={80}
-                    width={80}
-                    color="#FFD300"
-                    secondaryColor={'#FFFFFF'}
-                    wrapperStyle=''
-                    wrapperClass=""
-                    visible={true}
-                    ariaLabel='oval-loading'
-                    strokeWidth={2}
-                    strokeWidthSecondary={2}
-                />
+                <Loader/>
                 <p className={'text-white text-2xl mt-2'}>Waiting to pair...</p>
             </div>
         </div>
