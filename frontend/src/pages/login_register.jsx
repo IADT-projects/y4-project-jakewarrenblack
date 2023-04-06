@@ -1,65 +1,112 @@
-import {Input} from "../components/Input";
-import {Button} from "../components/Button";
-import {useEffect, useState} from "react";
-import {useContext} from 'react'
-import {AuthContext} from '../utils/AuthContext'
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { AuthContext } from "../utils/AuthContext";
 
 export const LoginRegister = () => {
-    const [loginSelected, setLoginSelected] = useState(true)
-    const {something, loginUserWithEmail, ping} = useContext(AuthContext);
+  const [loginSelected, setLoginSelected] = useState(true);
+  const { loginUserWithEmail, loading, setLoading, register } = useContext(AuthContext);
 
-    const Form = () => {
-        const content = () => {
-            if(loginSelected){
-                return (
-                    <>
-                        <Input label={'Email'} type={'email'}/>
-                        <Input label={'Password'} type={'password'}/>
-                        <Button onClick={(e) => {
-                            e.preventDefault()
-                            window.location.href = 'http://localhost:5000/api/auth/google'
-                        }} btnText={'Sign in with Google'}/>
-                        <Button onClick={async (e) => {
-                            e.preventDefault()
-                            //
-                            loginUserWithEmail({
-                                username: 'miggeldy',
-                                password: 'test'
-                            }, location)
+  const Form = () => {
+      const [form, setForm] = useState({
+          username: "",
+          email: "",
+          password: ""
+      });
 
-                            //ping()
+      const handleForm = (e) => {
+          console.log(e.target.value)
+          let name = e.target.name;
+          let value = e.target.value;
 
-                        }} btnText={'Login'}/>
-                    </>
-                )
-            }
-            else{
-                return (
-                    <>
+          console.table(name, value)
 
-                        <Input label={'First name'} type={'text'}/>
-                        <Input label={'Surname'} type={'text'}/>
-                        <Input label={'Email'} type={'email'}/>
-                        <Input label={'Password'} type={'password'}/>
-                        <Button btnText={'Sign Up'}/>
-                    </>
-                )
-            }
+          setForm(prevState => ({
+              ...prevState,
+              [name]: value
+          }));
+      };
 
-        }
+      const submitForm = (type) => {
+          if(type === 'login'){
+              loginUserWithEmail({
+                  username: form.username,
+                  email: form.email,
+                  password: form.password
+              }, location)
+          }
+          else if(type === 'register'){
+              register({
+                  username: form.username,
+                  email: form.email,
+                  password: form.password
+              }, location)
+          }
 
+      };
+
+
+      const content = () => {
+      if (loginSelected) {
         return (
-            <form className={'flex flex-col'}>
-                <h1 className={'text-white text-4xl font-semibold mb-5'}>{loginSelected ? 'Login' : 'Create an Account'}</h1>
-                {content()}
-                <p onClick={() => setLoginSelected(!loginSelected)} className={'underline text-cyberYellow mt-3 font-medium'}>{loginSelected ? 'Register' : 'Login'}</p>
-            </form>
-        )
-    }
+          <>
+            <Input name={'username'} value={form.username} handleForm={handleForm} label={"Username"} type={"text"} />
+            <Input name={'email'} value={form.email} handleForm={handleForm} label={"Email"} type={"email"} />
+            <Input name={'password'} value={form.password} handleForm={handleForm} label={"Password"} type={"password"} />
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = "http://localhost:5000/api/auth/google";
+              }}
+              btnText={"Sign in with Google"}
+            />
+            <Button
+              onClick={async (e) => {
+                e.preventDefault();
+                submitForm('login')
+              }}
+              btnText={"Login"}
+            />
+          </>
+        );
+      } else {
+        return (
+          <>
+              <Input name={'username'} value={form.username} handleForm={handleForm} label={"Username"} type={"text"} />
+              <Input name={'email'} value={form.email} handleForm={handleForm} label={"Email"} type={"email"} />
+              <Input name={'password'} value={form.password} handleForm={handleForm} label={"Password"} type={"password"} />
+              <Button
+                  onClick={async (e) => {
+                      e.preventDefault();
+                      submitForm('register')
+                  }}
+                  btnText={"Sign Up"}
+              />
+          </>
+        );
+      }
+    };
 
     return (
-        <div className={'px-1'}>
-            <Form/>
-        </div>
-    )
-}
+      <form className={"flex flex-col"}>
+        <h1 className={"mb-5 text-4xl font-semibold text-white"}>
+          {loginSelected ? "Login" : "Create an Account"}
+        </h1>
+        {content()}
+        <p
+          onClick={() => setLoginSelected(!loginSelected)}
+          className={"mt-3 font-medium text-cyberYellow underline"}
+        >
+          {loginSelected ? "Register" : "Login"}
+        </p>
+      </form>
+    );
+  };
+
+  return (
+    <div className={"px-1"}>
+      <Form />
+    </div>
+  );
+};

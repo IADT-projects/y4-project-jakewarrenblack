@@ -37,8 +37,8 @@ export const AuthProvider = (props) => {
         try {
             const options = attachTokenToHeaders(token)
             const response = await axios.get('http://localhost:5000/api/auth/me', options);
-            
-            
+
+
 
             console.log('getMe success:', {
                 user: response
@@ -62,10 +62,11 @@ export const AuthProvider = (props) => {
     const loginUserWithEmail = async (formData, location) => {
         setLoading(true);
         setError(null);
-        console.log('piss')
 
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+            const response = await axios.post('http://localhost:5000/api/auth/login', {
+                ...formData
+            });
 
             console.log('response: ', response)
 
@@ -73,19 +74,12 @@ export const AuthProvider = (props) => {
             setToken(response.data.token);
 
             Cookies.set('x-auth-cookie', response.data.token)
-            //await loadMe(response.data.token)
-
-
 
             console.log('Email/PW auth info:', response)
-
-
 
             setLoading(false);
 
             location.replace('/home')
-
-
 
             // when you login with oauth, the server sets a cookie and then redirects the user.
             // when you login with email/username and password, the server just responds with some json
@@ -94,7 +88,6 @@ export const AuthProvider = (props) => {
 
             if(err){
                 setError(err.response.data.message);
-
 
                 console.log('Email/PW auth error:', {
                     error: err
@@ -140,16 +133,48 @@ export const AuthProvider = (props) => {
         });
     };
 
+    const register = async (formData, location) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response =  await axios.post('http://localhost:5000/api/auth/register', {
+                ...formData
+            })
+
+            console.log('response: ', response)
+
+            setUser(response.data.me);
+            setToken(response.data.token);
+
+            await loginUserWithEmail(formData, location)
+
+        } catch (err) {
+            if(err){
+                setError(err.response.data.message);
+
+                console.log('Email/PW auth error:', {
+                    error: err
+                })
+
+                setLoading(false);
+            }
+        }
+    }
+
+
     const authContextValues = {
         user,
         setUser,
         token,
         loading,
+        setLoading,
         error,
         loginUserWithOauth,
         loginUserWithEmail,
         loadMe,
-        clearAllValues
+        clearAllValues,
+        register
     };
 
     return (
