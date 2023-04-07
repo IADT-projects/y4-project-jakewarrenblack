@@ -14,6 +14,7 @@ import {Settings} from "./pages/settings";
 import {AuthContext} from "./utils/AuthContext";
 import {Loader} from "./components/Loader";
 import {Labelling} from "./pages/labelling";
+import {Upload} from "./pages/upload";
 
 
 
@@ -42,12 +43,13 @@ function App() {
   return (
     <>
         {/* Height of container fills screen but excludes bottom navigation in its height */}
-        <div className={'w-full flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2 bg-navy'}>
+        <div style={{height: 'calc(100vh - 85px)'}} className={'w-full flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2 bg-navy'}>
             {
                 loading ? <Loader/> : (
                     <Routes>
                         <Route path="/" element={<LoginRegister />} />
                         <Route path="/label" element={<Labelling />} />
+                        <Route path="/upload" element={<Upload />} />
                         <Route path="/" element={<ProtectedRoute />}>
                             <Route path="/home" element={<Home />} />
                             <Route path="/pair" element={<Pairing />} />

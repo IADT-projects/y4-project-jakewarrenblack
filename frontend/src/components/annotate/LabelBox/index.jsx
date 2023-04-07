@@ -47,4 +47,3 @@ const LabelBox = React.forwardRef(({ inputMethod, ...props }, forwardedRef) => {
 });
 LabelBox.displayName = 'LabelBox';
 export default LabelBox;
-//# sourceMappingURL=index.jsx.map
