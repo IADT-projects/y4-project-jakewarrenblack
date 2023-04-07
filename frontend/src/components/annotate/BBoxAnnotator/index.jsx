@@ -133,12 +133,13 @@ const BBoxAnnotator = React.forwardRef(({ url, borderWidth = 2, inputMethod, lab
     }));
     const rect = rectangle();
     return (<div className={classes.bBoxAnnotator} style={{
-        width: `${bBoxAnnotatorStyle.width}px`,
-        height: `${bBoxAnnotatorStyle.height}px`,
+        width: `auto`,
+        height: `100%`,
     }} ref={bBoxAnnotatorRef} onMouseDown={mouseDownHandler}>
             <div className={classes.imageFrame} style={{
-        width: `${imageFrameStyle.width}px`,
-        height: `${imageFrameStyle.height}px`,
+        width: `auto`,
+        height: `100%`,
+        backgroundRepeat: 'no-repeat',
         backgroundImage: `url(${imageFrameStyle.backgroundImageSrc})`,
     }}>
                 {status === 'hold' || status === 'input' ? <BBoxSelector rectangle={rect}/> : null}

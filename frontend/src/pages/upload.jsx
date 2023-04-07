@@ -2,6 +2,7 @@ import 'react-dropzone-uploader/dist/styles.css'
 import Dropzone from "react-dropzone-uploader";
 import {useState} from "react";
 import { getDroppedOrSelectedFiles } from 'html5-file-selector'
+import BBoxAnnotator from "../components/annotate";
 
 export const Upload = () => {
     // specify upload params and url for your files
@@ -58,10 +59,22 @@ export const Upload = () => {
     }
 
 
+
     const myPreview = ({meta}) => {
-        console.log('meta: ', meta)
+        const labels = ['Cow', 'Sheep']
+        const [entries, setEntries] = useState([])
+
+        //console.log('meta: ', meta)
+        // <img className={'h-full m-auto'} src={meta.previewUrl}/>
         return (
-            <img className={'h-full m-auto'} src={meta.previewUrl}/>
+            <div className={'h-full m-auto'}>
+                <BBoxAnnotator
+                    url={meta.previewUrl}
+                    inputMethod="select"
+                    labels={labels}
+                    onChange={(e) => setEntries(e)}
+                />
+            </div>
         )
     }
 
