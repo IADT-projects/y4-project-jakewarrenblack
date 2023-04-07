@@ -13,6 +13,7 @@ import {Pets} from "./pages/pets";
 import {Settings} from "./pages/settings";
 import {AuthContext} from "./utils/AuthContext";
 import {Loader} from "./components/Loader";
+import {Labelling} from "./pages/labelling";
 
 
 
@@ -46,9 +47,11 @@ function App() {
                 loading ? <Loader/> : (
                     <Routes>
                         <Route path="/" element={<LoginRegister />} />
+                        <Route path="/label" element={<Labelling />} />
                         <Route path="/" element={<ProtectedRoute />}>
                             <Route path="/home" element={<Home />} />
                             <Route path="/pair" element={<Pairing />} />
+
                             <Route path="/captures" element={<Captures />} />
                             <Route path="/pets" element={<Pets />} />
                             <Route path="/settings" element={<Settings/>} />

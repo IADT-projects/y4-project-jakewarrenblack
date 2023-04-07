@@ -1,14 +1,9 @@
-import {Input} from "../components/Input";
-import {Button} from "../components/Button";
 import {Link, useNavigate} from "react-router-dom";
 import Markdown from 'markdown-to-jsx';
 import React, {useContext} from 'react';
-import { render } from 'react-dom';
 import {useEffect, useState} from "react";
-import ReactMarkdown from "react-markdown";
 import {AuthContext} from '../utils/AuthContext'
 import axios from "axios";
-import Cookies from 'js-cookie'
 
 const PrivacyPolicy = () => {
     const [isOpen, setIsOpen] = useState(false)
