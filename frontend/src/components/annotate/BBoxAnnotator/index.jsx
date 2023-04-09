@@ -159,35 +159,33 @@ const BBoxAnnotator = React.forwardRef(({ url, borderWidth = 2, inputMethod, lab
                 width: `${entry.width}px`,
                 height: `${entry.height}px`}}
                 key={i}
-                onMouseOver={() => setEntries((prevEntries) => prevEntries.map((e) => (e.id === entry.id ? { ...e, showCloseButton: true } : e)))}
-                onMouseLeave={() => setEntries((prevEntries) => prevEntries.map((e) => (e.id === entry.id ? { ...e, showCloseButton: false } : e)))}>
-
-                    {entry.showCloseButton &&
-                     <div
-                         className={'border-white border-2 select-none text-white text-center cursor-pointer overflow-hidden bg-[#030] absolute'}
-                         style={{
-                            top: '-8px',
-                            right: '-8px',
-                            width: '16px',
-                            height: '0',
-                            padding: '16px 0 0 0',
-                            borderRadius: '18px',
-                        }}
-                         onMouseDown={(e) => {
-                            e.stopPropagation();
-                        }}
-                         onClick={() => {
-                            setEntries(entries.filter((e) => e.id !== entry.id));
-                        }}>
-                        <div className={'block text-center absolute'} style={{width: '16px', top: '-2px', left: '0', fontSize: '16px', lineHeight: '16px',}}>
-                            &#215;
-                        </div>
-                    </div>}
-
-                    <div style={{ overflow: 'hidden' }}>
-                        {entry.label}
+                //onMouseOver={() => setEntries((prevEntries) => prevEntries.map((e) => (e.id === entry.id ? { ...e, showCloseButton: true } : e)))}
+                //onMouseLeave={() => setEntries((prevEntries) => prevEntries.map((e) => (e.id === entry.id ? { ...e, showCloseButton: false } : e)))}
+                >
+                 <div
+                     className={'border-white border-2 select-none text-white text-center cursor-pointer overflow-hidden bg-[#030] absolute'}
+                     style={{
+                        top: '-8px',
+                        right: '-8px',
+                        width: '16px',
+                        height: '0',
+                        padding: '16px 0 0 0',
+                        borderRadius: '18px',
+                    }}
+                     onMouseDown={(e) => {
+                        e.stopPropagation();
+                    }}
+                     onClick={() => {
+                        setEntries(entries.filter((e) => e.id !== entry.id));
+                    }}>
+                    <div className={'block text-center absolute'} style={{width: '16px', top: '-2px', left: '0', fontSize: '16px', lineHeight: '16px',}}>
+                        &#215;
                     </div>
+                </div>
 
+                <div style={{ overflow: 'hidden' }}>
+                    {entry.label}
+                </div>
             </div>
         )
     }

@@ -5,23 +5,21 @@ import { getDroppedOrSelectedFiles } from 'html5-file-selector'
 import BBoxAnnotator from "../components/annotate";
 
 export const Upload = () => {
-    // specify upload params and url for your files
-    const getUploadParams = ({ meta }) => { return { url: 'https://httpbin.org/post' } }
-
-    // called every time a file's `status` changes
-    const handleChangeStatus = ({ meta, file }, status) => { console.log(status, meta, file) }
 
     const [files, setFiles] = useState([])
 
-    // receives array of files that are done uploading when submit button is clicked
-    const handleSubmit = (file, allFiles) => {
-        // console.log(files.map(f => f.meta))
-        // allFiles.forEach(f => f.remove())
+    // file status will change every time we add a file, since we've omitted the get upload params step
+    const handleChangeStatus = ({ meta, file }, status) => {
+        console.log(status, meta, file)
 
-        setFiles([
-            ...files,
-            file
-        ])
+        // when status is 'done' the file has been prepared and validated
+
+        if(status === 'done'){
+            setFiles([
+                ...files,
+                file
+            ])
+        }
     }
 
     const myLayout = ({ input, previews, submitButton, dropzoneProps, files, extra: { maxFiles } }) => {
@@ -66,13 +64,47 @@ export const Upload = () => {
 
         //console.log('meta: ', meta)
         // <img className={'h-full m-auto'} src={meta.previewUrl}/>
+
+        console.log('files: ', files)
+
+        console.log('meta: ', meta)
+
+        console.log(entries)
+
+
+        // here i have a ref to the id of the preview image we're looking at
+        // when the user adds an annotation, add that annotation data to the image itself
+
+        // there can be multiple annotations in an image
         return (
             <div className={'h-full m-auto'}>
                 <BBoxAnnotator
                     url={meta.previewUrl}
                     inputMethod="select"
                     labels={labels}
-                    onChange={(e) => setEntries(e)}
+                    onChange={(e) => {
+                        if(e.length){
+                            console.log('bbox annotator change: ', e)
+
+                            // means user has selected a label, at least one
+
+                            // it considers mouseOver to be onChange
+                            if(e[0].label){
+                                console.log(e[0].label)
+
+                                // if i change the files, bbox annotation gets reset, since the preview changed...
+
+                                // setFiles(files.map((file) => {
+                                //     if(file.id === meta.id){
+                                //         file.annotation = e
+                                //     }
+                                //
+                                //     return file;
+                                // }))
+                            }
+
+                        }
+                    }}
                 />
             </div>
         )
@@ -104,12 +136,11 @@ export const Upload = () => {
 
     return (
         <Dropzone
+
+            onChangeStatus={handleChangeStatus}
             InputComponent={myInput}
             LayoutComponent={myLayout}
             PreviewComponent={myPreview}
-            getUploadParams={getUploadParams}
-            onChangeStatus={handleChangeStatus}
-            onSubmit={handleSubmit}
             accept="image/*"
         />
     )

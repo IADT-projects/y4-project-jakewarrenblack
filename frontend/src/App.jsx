@@ -24,21 +24,21 @@ function App() {
     const {loginUserWithOauth, loading} = useContext(AuthContext)
     const navigate = useNavigate()
 
-    useEffect(async () => {
-        const cookieJwt = Cookies.get('x-auth-cookie');
-        if (cookieJwt) {
-            await loginUserWithOauth(cookieJwt)
-                .then((res) => {
-                    navigate('/home')
-                })
-                .catch((e) => {
-                    console.log(e)
-                })
-        }
-        else{
-            console.log('No cookie in session')
-        }
-    }, []);
+    // useEffect(async () => {
+    //     const cookieJwt = Cookies.get('x-auth-cookie');
+    //     if (cookieJwt) {
+    //         await loginUserWithOauth(cookieJwt)
+    //             .then((res) => {
+    //                 navigate('/home')
+    //             })
+    //             .catch((e) => {
+    //                 console.log(e)
+    //             })
+    //     }
+    //     else{
+    //         console.log('No cookie in session')
+    //     }
+    // }, []);
 
   return (
     <>
