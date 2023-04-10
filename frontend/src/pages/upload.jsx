@@ -48,11 +48,40 @@ export const Upload = () => {
 
     const myLayout = ({ input, previews, submitButton, dropzoneProps, files, extra: { maxFiles } }) => {
         const [selected, setSelected] = useState(0)
+
+
+        const [annotations, setAnnotations] = useState([])
+
+        // every time a new image is added this will be reset, obviously don't want that since we're storing annotations in here
+        // TODO: problem now is persisting this state across all the images
+        const [annotatedFiles, setAnnotatedFiles] = useState([...files])
+
+        useEffect(() => {
+            setAnnotatedFiles(
+                annotatedFiles.map((file) => {
+                    // means annotation with fileName matching file.name exists, apply the annotation to that file
+                    if(annotations.findIndex(annotation => annotation.fileName === file.name) !== -1){
+                        return {
+                            // this works
+                            file: file,
+                            annotation: annotations[annotations.findIndex(annotation => annotation.fileName === file.name)]
+                        }
+                    }
+                    else{
+                        return file;
+                    }
+                })
+            )
+        }, [annotations])
+
+
         return (
             <div className={'h-full'}>
                 <div className={'h-5/6'}>
                     {/* previews = an array of myPreview components */}
-                    {previews[selected]}
+                    {files[selected] && console.log('File: ', files[selected])}
+
+                    {files[selected] && <MyPreview annotations={annotations} setAnnotations={setAnnotations} preview={files[selected].meta}/>}
 
 
                     {/*{files.length > 0 && submitButton}*/}
@@ -82,36 +111,14 @@ export const Upload = () => {
 
 
 
-    const myPreview = ({meta}) => {
+    const MyPreview = ({preview, annotations, setAnnotations}) => {
         const labels = ['Cow', 'Sheep']
-        const [annotations, setAnnotations] = useState([])
 
-        // every time a new image is added this will be reset, obviously don't want that since we're storing annotations in here
-        // TODO: problem now is persisting this state across all the images
-        const [annotatedFiles, setAnnotatedFiles] = useState([...files])
-
-        useEffect(() => {
-            setAnnotatedFiles(
-                annotatedFiles.map((file) => {
-                    // means annotation with fileName matching file.name exists, apply the annotation to that file
-                    if(annotations.findIndex(annotation => annotation.fileName === file.name) !== -1){
-                        return {
-                            // this works
-                            file: file,
-                            annotation: annotations[annotations.findIndex(annotation => annotation.fileName === file.name)]
-                        }
-                    }
-                    else{
-                        return file;
-                    }
-                })
-            )
-        }, [annotations])
-
+        console.log('Preview: ', preview)
         return (
             <div className={'h-full m-auto'}>
                 <BBoxAnnotator
-                    url={meta.previewUrl}
+                    url={preview.previewUrl}
                     inputMethod="select"
                     labels={labels}
                     onChange={(annotationData) => {
@@ -124,7 +131,7 @@ export const Upload = () => {
                                     ...annotations,
                                     {
                                         ...annotationData,
-                                        fileName: meta.name
+                                        fileName: preview.name
                                     }
                                 ])
                             }
@@ -169,7 +176,7 @@ export const Upload = () => {
             onChangeStatus={handleChangeStatus}
             InputComponent={myInput}
             LayoutComponent={myLayout}
-            PreviewComponent={myPreview}
+            PreviewComponent={MyPreview}
             accept="image/*"
         />
     )
