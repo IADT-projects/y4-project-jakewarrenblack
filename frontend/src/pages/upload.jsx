@@ -21,24 +21,6 @@ export const Upload = () => {
                 file
             ])
         }
-
-        let annotationMeta;
-
-        console.log('Annotations: ', annotations)
-        console.log('FileName: ', meta.name)
-
-        let annotationForThisFile = annotations.findIndex(annotation => annotation.fileName === meta.name) !== -1
-
-        console.log('Annotation for this file: ', annotationForThisFile)
-
-        // now check if there's an annotation available for this file
-        if(annotationForThisFile){
-            annotationMeta = annotations[annotationForThisFile]
-        }
-
-        // you can return something from here to safely mutate the file meta
-        //e.g.
-        return {meta: {annotationData: annotationMeta}}
     }
 
 
@@ -48,26 +30,24 @@ export const Upload = () => {
 
     const myLayout = ({ input, previews, submitButton, dropzoneProps, files, extra: { maxFiles } }) => {
         const [selected, setSelected] = useState(0)
-
-
         const [annotations, setAnnotations] = useState([])
-
-        // every time a new image is added this will be reset, obviously don't want that since we're storing annotations in here
-        // TODO: problem now is persisting this state across all the images
-        const [annotatedFiles, setAnnotatedFiles] = useState([...files])
+        const [annotatedFiles, setAnnotatedFiles] = useState([])
 
         useEffect(() => {
+            const relevantFileExists = files.findIndex(annotation => annotation.fileName === files[selected].name) !== -1
+            console.log('Relevant file exists: ', relevantFileExists)
+
             setAnnotatedFiles(
-                annotatedFiles.map((file) => {
+                files.map((file) => {
                     // means annotation with fileName matching file.name exists, apply the annotation to that file
-                    if(annotations.findIndex(annotation => annotation.fileName === file.name) !== -1){
+                    if(relevantFileExists){
                         return {
-                            // this works
-                            file: file,
-                            annotation: annotations[annotations.findIndex(annotation => annotation.fileName === file.name)]
+                            file: files[selected],
+                            annotation: annotations[annotations.findIndex(annotation => annotation.fileName === file.meta.name)]
                         }
                     }
                     else{
+                        console.log('No annotation found for this file!!')
                         return file;
                     }
                 })
@@ -78,11 +58,7 @@ export const Upload = () => {
         return (
             <div className={'h-full'}>
                 <div className={'h-5/6'}>
-                    {/* previews = an array of myPreview components */}
-                    {files[selected] && console.log('File: ', files[selected])}
-
                     {files[selected] && <MyPreview annotations={annotations} setAnnotations={setAnnotations} preview={files[selected].meta}/>}
-
 
                     {/*{files.length > 0 && submitButton}*/}
                 </div>
@@ -123,10 +99,7 @@ export const Upload = () => {
                     labels={labels}
                     onChange={(annotationData) => {
                         if(annotationData.length){
-                            //
                             if(annotationData[0].label){
-
-
                                 setAnnotations([
                                     ...annotations,
                                     {
@@ -135,7 +108,6 @@ export const Upload = () => {
                                     }
                                 ])
                             }
-
                         }
                     }}
                 />
