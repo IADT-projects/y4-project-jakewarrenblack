@@ -1,12 +1,13 @@
 import 'react-dropzone-uploader/dist/styles.css'
 import Dropzone from "react-dropzone-uploader";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { getDroppedOrSelectedFiles } from 'html5-file-selector'
 import BBoxAnnotator from "../components/annotate";
 
 export const Upload = () => {
 
     const [files, setFiles] = useState([])
+    const [annotations, setAnnotations] = useState([])
 
     // file status will change every time we add a file, since we've omitted the get upload params step
     const handleChangeStatus = ({ meta, file }, status) => {
@@ -20,7 +21,30 @@ export const Upload = () => {
                 file
             ])
         }
+
+        let annotationMeta;
+
+        console.log('Annotations: ', annotations)
+        console.log('FileName: ', meta.name)
+
+        let annotationForThisFile = annotations.findIndex(annotation => annotation.fileName === meta.name) !== -1
+
+        console.log('Annotation for this file: ', annotationForThisFile)
+
+        // now check if there's an annotation available for this file
+        if(annotationForThisFile){
+            annotationMeta = annotations[annotationForThisFile]
+        }
+
+        // you can return something from here to safely mutate the file meta
+        //e.g.
+        return {meta: {annotationData: annotationMeta}}
     }
+
+
+    useEffect(() => {
+        console.log('Files updated: ', files)
+    }, [files])
 
     const myLayout = ({ input, previews, submitButton, dropzoneProps, files, extra: { maxFiles } }) => {
         const [selected, setSelected] = useState(0)
@@ -60,52 +84,57 @@ export const Upload = () => {
 
     const myPreview = ({meta}) => {
         const labels = ['Cow', 'Sheep']
-        const [entries, setEntries] = useState([])
+        const [annotations, setAnnotations] = useState([])
 
-        //console.log('meta: ', meta)
-        // <img className={'h-full m-auto'} src={meta.previewUrl}/>
+        // every time a new image is added this will be reset, obviously don't want that since we're storing annotations in here
+        // TODO: problem now is persisting this state across all the images
+        const [annotatedFiles, setAnnotatedFiles] = useState([...files])
 
-        console.log('files: ', files)
+        useEffect(() => {
+            setAnnotatedFiles(
+                annotatedFiles.map((file) => {
+                    // means annotation with fileName matching file.name exists, apply the annotation to that file
+                    if(annotations.findIndex(annotation => annotation.fileName === file.name) !== -1){
+                        return {
+                            // this works
+                            file: file,
+                            annotation: annotations[annotations.findIndex(annotation => annotation.fileName === file.name)]
+                        }
+                    }
+                    else{
+                        return file;
+                    }
+                })
+            )
+        }, [annotations])
 
-        console.log('meta: ', meta)
-
-        console.log(entries)
-
-
-        // here i have a ref to the id of the preview image we're looking at
-        // when the user adds an annotation, add that annotation data to the image itself
-
-        // there can be multiple annotations in an image
         return (
             <div className={'h-full m-auto'}>
                 <BBoxAnnotator
                     url={meta.previewUrl}
                     inputMethod="select"
                     labels={labels}
-                    onChange={(e) => {
-                        if(e.length){
-                            console.log('bbox annotator change: ', e)
+                    onChange={(annotationData) => {
+                        if(annotationData.length){
+                            //
+                            if(annotationData[0].label){
 
-                            // means user has selected a label, at least one
 
-                            // it considers mouseOver to be onChange
-                            if(e[0].label){
-                                console.log(e[0].label)
-
-                                // if i change the files, bbox annotation gets reset, since the preview changed...
-
-                                // setFiles(files.map((file) => {
-                                //     if(file.id === meta.id){
-                                //         file.annotation = e
-                                //     }
-                                //
-                                //     return file;
-                                // }))
+                                setAnnotations([
+                                    ...annotations,
+                                    {
+                                        ...annotationData,
+                                        fileName: meta.name
+                                    }
+                                ])
                             }
 
                         }
                     }}
                 />
+                <button className={'text-white hover:cursor-pointer absolute'} onClick={(e) => {
+
+                }}>submit</button>
             </div>
         )
     }
