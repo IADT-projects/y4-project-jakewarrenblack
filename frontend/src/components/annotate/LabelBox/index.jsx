@@ -12,6 +12,7 @@ const LabelBox = React.forwardRef(({ inputMethod, ...props }, forwardedRef) => {
     const classes = useStyles(props);
     const [value, setValue] = useState('');
     const changeHandler = (e) => {
+        e.preventDefault()
         setValue(e.target.value);
         if (inputMethod === 'select') {
             props.onSubmit(e.target.value);

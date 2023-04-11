@@ -11,95 +11,41 @@ export const Upload = () => {
     const [files, setFiles] = useState([])
     const [annotations, setAnnotations] = useState([])
 
+    const [existingAnnotation, setExistingAnnotation] = useState(null)
+
+    // useEffect(() => {
+    //     const relevantAnnotation = annotations.find(annotation => annotation.fileName === files[selected].file.name)
+    //
+    //     console.log('Found existing annotation: ', relevantAnnotation)
+    //
+    //     setExistingAnnotation(relevantAnnotation ?? null)
+    // }, [selected])
+
     useEffect(() => {
         if(files.length){
-            console.log('Annotations and files: ', {
-                annotations,
-                files
-            })
             // if the annotation's fileName attribute matches the name of one of our unnannotated files
             const relevantAnnotation = annotations.find(annotation => annotation.fileName === files[selected].file.name)
-            const relevantFile = files.find(file => file.file.name === relevantAnnotation.fileName)
 
-            // console.log('Files & annotations: ', {
-            //     files,
-            //     annotations,
-            //     'Relevant file: ': relevantFile,
-            //     selectedFile: files[selected].name
-            // })
+            if(relevantAnnotation) {
+                const relevantFile = files.find(file => file.file.name === relevantAnnotation.fileName)
 
-            // setAnnotatedFiles(prevAnnotatedFiles =>
-            //     // I have no clause here to say 'if you're already annotated, you're fine'
-            //     files.map((file) => {
-            //         // means annotation with fileName matching file.name exists, apply the annotation to that file
-            //         if(relevantFile && file.name === relevantFile.fileName){
-            //             return {
-            //                 file: files[selected],
-            //                 annotation: annotations[annotations.findIndex(annotation => annotation.fileName === files[selected].name)]
-            //             }
-            //         }
-            //         else{
-            //             // check if this file already has an annotation
-            //             return file;
-            //         }
-            //     })
-            // )
+                const fileToBeAdded = {
+                    file: relevantFile.file, // exclude all the metadata
+                    annotation: relevantAnnotation
+                }
 
-            // setAnnotatedFiles([
-            //     // we have an annotation with a fileName (presumably) matching that of the one on the screen right now, in other words files[selected].name
-            //     // I need to find that file and create an annotatedFile entry which will be in the format {annotation, file} where annotation is the coords, file is the actual file we will upload
-            //     // However, the file might already exist in annotatedFiles
-            //     // I need to add a newly annotated file but keep the old annotations
-            //     // relevantFile is okay, that's getting the file in question
-            //     annotatedFiles.map((annotatedFile) => {
-            //         if(annotatedFile.annotation.fileName === relevantFile.fileName){
-            //             // means we've got a new annotation for this specific annotatedFile record
-            //             return {
-            //                 file: files[selected],
-            //                 annotation: annotations[annotations.findIndex(annotation => annotation.fileName === files[selected].name)]
-            //             }
-            //         }
-            //         else{
-            //             if(annotatedFile.annotation){
-            //                 return annotatedFile;
-            //             }
-            //             else{
-            //                 // not annotated, just set it to a plain old file
-            //                 return files[selected]
-            //             }
-            //
-            //         }
-            //     })
-            // ])
-
-            const fileToBeAdded = {
-                file: relevantFile.file, // exclude all the metadata
-                annotation: relevantAnnotation
+                setAnnotatedFiles([
+                    ...annotatedFiles,
+                    fileToBeAdded
+                ])
             }
-
-            console.log('File to be added: ', fileToBeAdded)
-            // we know that annotations changed already
-            setAnnotatedFiles([
-                ...annotatedFiles,
-                fileToBeAdded
-            ])
         }
     }, [annotations])
 
 
-    useEffect(() => {
-        console.log('Annotated Files: ', annotatedFiles)
-    }, [annotatedFiles])
-
-
-
-    useEffect(() => {
-        console.log('Files changed: ', files)
-    }, [files])
 
     // file status will change every time we add a file, since we've omitted the get upload params step
     const handleChangeStatus = (fileWithMetadata, status, allFilesWithMetadata) => {
-
         if(status === 'done'){
             setFiles([
                 ...files,
@@ -112,7 +58,7 @@ export const Upload = () => {
         return (
             <div className={'h-full'}>
                 <div className={'h-5/6'}>
-                    {files[selected] && <MyPreview annotations={annotations} setAnnotations={setAnnotations} preview={files[selected].meta}/>}
+                    {files[selected] && <MyPreview preview={files[selected].meta}/>}
 
                     {/*{files.length > 0 && submitButton}*/}
                 </div>
@@ -139,14 +85,21 @@ export const Upload = () => {
         })
     }
 
-    const MyPreview = ({preview, annotations, setAnnotations}) => {
+    const MyPreview = ({preview,}) => {
         const labels = ['Cow', 'Sheep']
+
+        // We've changed bbox annotator to allow entries to be passed in
+        // So we should try to find a relevant annotation entry for the image we're looking at right now
+
+        // {"left":120,"top":94,"width":234,"height":133,"label":"Cow","id":"a8b6212e-eb41-4a1f-879d-827707b560e9","showCloseButton":false}
 
         return ( files[selected] ?
             <div className={'h-full m-auto'}>
                 <BBoxAnnotator
+                    //existingAnnotations={annotatedFiles.map((entry => entry.annotation))}
+                    //existingAnnotations={[{"left":120,"top":94,"width":234,"height":133,"label":"Cow","id":"a8b6212e-eb41-4a1f-879d-827707b560e9","showCloseButton":false}]}
                     url={files[selected].meta.previewUrl}
-                    inputMethod="select"
+                    inputMethod="text"
                     labels={labels}
                     onChange={(annotationData) => {
                         if(annotationData.length){
@@ -162,7 +115,7 @@ export const Upload = () => {
                         }
                     }}
                 />
-                <button className={'text-white hover:cursor-pointer absolute'} onClick={(e) => {}}>submit</button>
+                {/*<button className={'text-white hover:cursor-pointer absolute'} onClick={(e) => {}}>confirm annoation</button>*/}
             </div> : ''
         )
     }

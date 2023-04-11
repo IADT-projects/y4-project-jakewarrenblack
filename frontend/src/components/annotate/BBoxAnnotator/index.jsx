@@ -14,26 +14,28 @@ const useStyles = createUseStyles({
     },
 });
 
-const BBoxAnnotator = React.forwardRef(({ url, borderWidth = 2, inputMethod, labels, onChange }, ref) => {
+const BBoxAnnotator = React.forwardRef(({ existingAnnotations, url, borderWidth = 2, inputMethod, labels, onChange }, ref) => {
     const classes = useStyles();
     const [pointer, setPointer] = useState(null);
     const [offset, setOffset] = useState(null);
-    const [entries, setEntries] = useState([]);
+    const [entries, setEntries] = useState(existingAnnotations ?? [])
     const [multiplier, setMultiplier] = useState(1);
 
-
     useEffect(() => {
-
         if(typeof(onChange) == "function"){
-            onChange(entries.map((entry) => ({
-                width: Math.round(entry.width * multiplier),
-                height: Math.round(entry.height * multiplier),
-                top: Math.round(entry.top * multiplier),
-                left: Math.round(entry.left * multiplier),
-                label: entry.label,
-            })));
+            // check if there are any entries present which are not undefined
+            if(entries.some(entry => entry !== undefined)){
+                // FIXME: tell it to only run onChange if existingAnnotations does not already contain the entry
+                // I don't understand why the annotation disappears after this onChange runs
+                onChange(entries.map((entry) => ({
+                    width: Math.round(entry.width * multiplier),
+                    height: Math.round(entry.height * multiplier),
+                    top: Math.round(entry.top * multiplier),
+                    left: Math.round(entry.left * multiplier),
+                    label: entry.label,
+                })));
+            }
         }
-
     }, [entries, multiplier]);
 
 
@@ -152,7 +154,7 @@ const BBoxAnnotator = React.forwardRef(({ url, borderWidth = 2, inputMethod, lab
 
 
     const entryItem = (entry, i) => {
-        return (
+        return ( entry ?
             <div className={'absolute text-red-500 border-red-500 border-2 absolute'} style={{
                 top: `${entry.top - borderWidth}px`,
                 left: `${entry.left - borderWidth}px`,
@@ -186,7 +188,7 @@ const BBoxAnnotator = React.forwardRef(({ url, borderWidth = 2, inputMethod, lab
                 <div style={{ overflow: 'hidden' }}>
                     {entry.label}
                 </div>
-            </div>
+            </div> : ''
         )
     }
 
