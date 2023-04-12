@@ -60,7 +60,7 @@ export const Upload = () => {
                 <div className={'h-5/6'}>
                     {files[selected] && <MyPreview preview={files[selected].meta}/>}
 
-                    {/*{files.length > 0 && submitButton}*/}
+                    {files.length > 0 && submitButton}
                 </div>
                 <div className={'flex flex-col'}>
                     <div className={'text-white flex w-full space-x-10 text-5xl justify-center'}>
@@ -115,7 +115,27 @@ export const Upload = () => {
                         }
                     }}
                 />
-                {/*<button className={'text-white hover:cursor-pointer absolute'} onClick={(e) => {}}>confirm annoation</button>*/}
+                <button className={'text-white hover:cursor-pointer absolute'} onClick={async (e) => {
+                        if(annotatedFiles.length){
+                            const formData = new FormData()
+
+                            annotatedFiles.forEach((annotatedFile) => {
+                                formData.append("files[]", annotatedFile.file);
+                                formData.append("annotations[]", JSON.stringify(annotatedFile.annotation));
+                            });
+
+                            axios.post(`http://localhost:5000/api/roboflow/uploadWithAnnotation`, formData, {
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                            })
+                            .then((res) => console.log('API Response: ', res))
+                            .catch((e) => console.error('Error: ', e))
+                        }
+                        else{
+                            alert('Annotate some images before submitting')
+                        }
+                }}>Finished</button>
             </div> : ''
         )
     }
@@ -141,12 +161,17 @@ export const Upload = () => {
         )
     }
 
+    const handleSubmit = (files, allFiles) => {
+        console.log('allfiles: ', allFiles)
+    }
+
     return (
         <Dropzone
             onChangeStatus={handleChangeStatus}
             InputComponent={myInput}
             LayoutComponent={myLayout}
             PreviewComponent={MyPreview}
+            onSubmit={handleSubmit}
             accept="image/*"
         />
     )
