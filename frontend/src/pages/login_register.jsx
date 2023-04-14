@@ -6,54 +6,76 @@ import { AuthContext } from "../utils/AuthContext";
 
 export const LoginRegister = () => {
   const [loginSelected, setLoginSelected] = useState(true);
-  const { loginUserWithEmail, loading, setLoading, register } = useContext(AuthContext);
+  const { loginUserWithEmail, loading, setLoading, register } =
+    useContext(AuthContext);
 
   const Form = () => {
-      const [form, setForm] = useState({
-          username: "",
-          email: "",
-          password: ""
-      });
+    const [form, setForm] = useState({
+      username: "",
+      email: "",
+      password: "",
+    });
 
-      const handleForm = (e) => {
-          console.log(e.target.value)
-          let name = e.target.name;
-          let value = e.target.value;
+    const handleForm = (e) => {
+      console.log(e.target.value);
+      let name = e.target.name;
+      let value = e.target.value;
 
-          console.table(name, value)
+      console.table(name, value);
 
-          setForm(prevState => ({
-              ...prevState,
-              [name]: value
-          }));
-      };
+      setForm((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    };
 
-      const submitForm = (type) => {
-          if(type === 'login'){
-              loginUserWithEmail({
-                  username: form.username,
-                  email: form.email,
-                  password: form.password
-              }, location)
-          }
-          else if(type === 'register'){
-              register({
-                  username: form.username,
-                  email: form.email,
-                  password: form.password
-              }, location)
-          }
+    const submitForm = (type) => {
+      if (type === "login") {
+        loginUserWithEmail(
+          {
+            username: form.username,
+            email: form.email,
+            password: form.password,
+          },
+          location
+        );
+      } else if (type === "register") {
+        register(
+          {
+            username: form.username,
+            email: form.email,
+            password: form.password,
+          },
+          location
+        );
+      }
+    };
 
-      };
-
-
-      const content = () => {
+    const content = () => {
       if (loginSelected) {
         return (
           <>
-            <Input name={'username'} value={form.username} handleForm={handleForm} label={"Username"} type={"text"} />
-            <Input name={'email'} value={form.email} handleForm={handleForm} label={"Email"} type={"email"} />
-            <Input name={'password'} value={form.password} handleForm={handleForm} label={"Password"} type={"password"} />
+            <Input
+              name={"username"}
+              value={form.username}
+              handleForm={handleForm}
+              label={"Username"}
+              type={"text"}
+            />
+            <Input
+              name={"email"}
+              value={form.email}
+              handleForm={handleForm}
+              label={"Email"}
+              type={"email"}
+            />
+            <Input
+              name={"password"}
+              value={form.password}
+              handleForm={handleForm}
+              label={"Password"}
+              type={"password"}
+            />
             <Button
               onClick={(e) => {
                 e.preventDefault();
@@ -64,7 +86,7 @@ export const LoginRegister = () => {
             <Button
               onClick={async (e) => {
                 e.preventDefault();
-                submitForm('login')
+                submitForm("login");
               }}
               btnText={"Login"}
             />
@@ -73,16 +95,34 @@ export const LoginRegister = () => {
       } else {
         return (
           <>
-              <Input name={'username'} value={form.username} handleForm={handleForm} label={"Username"} type={"text"} />
-              <Input name={'email'} value={form.email} handleForm={handleForm} label={"Email"} type={"email"} />
-              <Input name={'password'} value={form.password} handleForm={handleForm} label={"Password"} type={"password"} />
-              <Button
-                  onClick={async (e) => {
-                      e.preventDefault();
-                      submitForm('register')
-                  }}
-                  btnText={"Sign Up"}
-              />
+            <Input
+              name={"username"}
+              value={form.username}
+              handleForm={handleForm}
+              label={"Username"}
+              type={"text"}
+            />
+            <Input
+              name={"email"}
+              value={form.email}
+              handleForm={handleForm}
+              label={"Email"}
+              type={"email"}
+            />
+            <Input
+              name={"password"}
+              value={form.password}
+              handleForm={handleForm}
+              label={"Password"}
+              type={"password"}
+            />
+            <Button
+              onClick={async (e) => {
+                e.preventDefault();
+                submitForm("register");
+              }}
+              btnText={"Sign Up"}
+            />
           </>
         );
       }

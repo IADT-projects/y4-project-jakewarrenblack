@@ -1,15 +1,18 @@
 import "react-dropzone-uploader/dist/styles.css";
 import Dropzone from "react-dropzone-uploader";
-import { useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { getDroppedOrSelectedFiles } from "html5-file-selector";
 import BBoxAnnotator from "../components/annotate";
 import axios from "axios";
+import { AuthContext } from "../utils/AuthContext";
 
 export const Upload = () => {
   const [selected, setSelected] = useState(0);
   const [annotatedFiles, setAnnotatedFiles] = useState([]);
   const [files, setFiles] = useState([]);
   const [annotations, setAnnotations] = useState([]);
+
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     if (files.length) {
@@ -150,6 +153,7 @@ export const Upload = () => {
                   {
                     headers: {
                       "Content-Type": "multipart/form-data",
+                      "x-auth-token": token,
                     },
                   }
                 )
