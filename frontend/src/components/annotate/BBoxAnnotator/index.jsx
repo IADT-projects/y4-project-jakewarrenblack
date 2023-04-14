@@ -32,26 +32,38 @@ const BBoxAnnotator = React.forwardRef(
     const classes = useStyles();
     const [pointer, setPointer] = useState(null);
     const [offset, setOffset] = useState(null);
-    // const [entries, setEntries] = useState(existingAnnotations);
     const [multiplier, setMultiplier] = useState(1);
 
     useEffect(() => {
-      if (typeof onChange == "function") {
-        // check if there are any entries present which are not undefined
-        if (entries.some((entry) => entry !== undefined)) {
-          console.log("Entries are: ", entries);
-          // FIXME: tell it to only run onChange if existingAnnotations does not already contain the entry
-          // I don't understand why the annotation disappears after this onChange runs
-          //   onChange(
-          //     entries.map((entry) => ({
-          //       width: Math.round(entry.width * multiplier),
-          //       height: Math.round(entry.height * multiplier),
-          //       top: Math.round(entry.top * multiplier),
-          //       left: Math.round(entry.left * multiplier),
-          //       label: entry.label,
-          //     }))
-          //   );
-        }
+      console.log("annotator rendered");
+    }, []);
+    /**
+     * Seems likely the cause of the annotations now being completely innacurate with regard to coordinates
+     * is caused by something relating to the fact the below useEffect is no longer running
+     * also not sure what role the multiplier plays, but it seems to be important
+     */
+
+    const [localEntries, setLocalEntries] = useState([]);
+    // I think I need this??
+    // But it runs HUNDREDS of times
+    // Why? Even if entries have only been set once. oh wait
+    useEffect(() => {
+      // check if there are any entries present which are not undefined
+      if (entries.some((entry) => entry !== undefined)) {
+        console.log("Entries are: ", entries);
+        // FIXME: tell it to only run onChange if existingAnnotations does not already contain the entry
+        // I don't understand why the annotation disappears after this onChange runs
+        setLocalEntries(
+          entries.map((entry) => ({
+            width: Math.round(entry.width * multiplier),
+            height: Math.round(entry.height * multiplier),
+            top: Math.round(entry.top * multiplier),
+            left: Math.round(entry.left * multiplier),
+            label: entry.label,
+          }))
+        );
+
+        console.log("After change: ", entries);
       }
     }, [entries, multiplier]);
 
@@ -62,6 +74,7 @@ const BBoxAnnotator = React.forwardRef(
 
     useEffect(() => {
       const maxWidth = bBoxAnnotatorRef.current?.offsetWidth || 1;
+      console.log("MAX WIDTH FOR MULTIPLIER: ", maxWidth);
       const imageElement = new Image();
       imageElement.src = url;
 
@@ -136,11 +149,6 @@ const BBoxAnnotator = React.forwardRef(
     }, [status, labelInputRef]);
 
     const addEntry = (label) => {
-      //   setEntries([
-      //     ...entries,
-      //     { ...rect, label, id: uuid(), showCloseButton: false },
-      //   ]);
-
       const newEntry = {
         ...rect,
         label,
@@ -197,7 +205,7 @@ const BBoxAnnotator = React.forwardRef(
     const entryItem = (entry, i) => {
       return entry ? (
         <div
-          className={"absolute absolute border-2 border-red-500 text-red-500"}
+          className={"absolute border-2 border-red-500 text-red-500"}
           style={{
             top: `${entry.top - borderWidth}px`,
             left: `${entry.left - borderWidth}px`,

@@ -1,6 +1,13 @@
 import "react-dropzone-uploader/dist/styles.css";
 import Dropzone from "react-dropzone-uploader";
-import { useCallback, useContext, useEffect, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+  useRef,
+} from "react";
 import { getDroppedOrSelectedFiles } from "html5-file-selector";
 import BBoxAnnotator from "../components/annotate";
 import axios from "axios";
@@ -25,6 +32,19 @@ export const Upload = () => {
         const relevantFile = files.find(
           (file) => file.file.name === relevantAnnotation.fileName
         );
+
+        // relevantAnnotation.width = Math.round(
+        //   relevantAnnotation.width * multiplier
+        // );
+        // relevantAnnotation.height = Math.round(
+        //   relevantAnnotation.height * multiplier
+        // );
+        // relevantAnnotation.top = Math.round(
+        //   relevantAnnotation.top * multiplier
+        // );
+        // relevantAnnotation.left = Math.round(
+        //   relevantAnnotation.left * multiplier
+        // );
 
         const fileToBeAdded = {
           file: relevantFile.file, // exclude all the metadata
@@ -118,6 +138,10 @@ export const Upload = () => {
           setEntries={setAnnotations}
           inputMethod="text"
           labels={labels}
+          // The entries I had here were those that had already run through the useEffect,
+          // entries.map, changing width, height etc based on multiplier
+          // I assume the multiplier ends up being more than 1
+
           // onChange={(annotationData) => {
           //   if (annotationData.length) {
           //     if (annotationData[0].label) {
