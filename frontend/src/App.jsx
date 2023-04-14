@@ -24,7 +24,8 @@ import { Upload } from "./pages/upload";
 
 function App() {
   // So when user refreshes page, check for a token, and just log them in again
-  const { loginUserWithOauth, loading } = useContext(AuthContext);
+  const { loginUserWithOauth, loading, hasGeneratedVersion } =
+    useContext(AuthContext);
   const navigate = useNavigate();
   const outlet = useOutlet();
 
@@ -34,7 +35,11 @@ function App() {
       await loginUserWithOauth(cookieJwt)
         .then((res) => {
           // navigate(outlet.location.pathname);
-          navigate("/home");
+          if (hasGeneratedVersion) {
+            navigate("/home");
+          } else {
+            navigate("/upload");
+          }
         })
         .catch((e) => {
           console.log(e);
