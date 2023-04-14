@@ -35,7 +35,7 @@ function App() {
       await loginUserWithOauth(cookieJwt)
         .then((res) => {
           // navigate(outlet.location.pathname);
-          if (hasGeneratedVersion) {
+          if (!hasGeneratedVersion) {
             navigate("/home");
           } else {
             navigate("/upload");

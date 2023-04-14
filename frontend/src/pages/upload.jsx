@@ -112,24 +112,62 @@ export const Upload = () => {
           //existingAnnotations={annotatedFiles.map((entry => entry.annotation))}
           //existingAnnotations={[{"left":120,"top":94,"width":234,"height":133,"label":"Cow","id":"a8b6212e-eb41-4a1f-879d-827707b560e9","showCloseButton":false}]}
           url={files[selected].meta.previewUrl}
+          entries={annotations}
+          selected={selected}
+          files={files}
+          setEntries={setAnnotations}
           inputMethod="text"
           labels={labels}
-          onChange={(annotationData) => {
-            if (annotationData.length) {
-              if (annotationData[0].label) {
-                setAnnotations([
-                  ...annotations,
-                  {
-                    ...annotationData,
-                    fileName: files[selected].file.name,
-                    imgWidth: files[selected].meta.width,
-                    imgHeight: files[selected].meta.height,
-                  },
-                ]);
-              }
-            }
-          }}
+          // onChange={(annotationData) => {
+          //   if (annotationData.length) {
+          //     if (annotationData[0].label) {
+          //       setAnnotations((prevAnnotations) => [
+          //         ...prevAnnotations,
+          //         {
+          //           ...annotationData,
+          //           fileName: files[selected].file.name,
+          //           imgWidth: files[selected].meta.width,
+          //           imgHeight: files[selected].meta.height,
+          //         },
+          //       ]);
+          //     }
+          //   }
+          // }}
         />
+      </div>
+    ) : (
+      ""
+    );
+  };
+
+  const myInput = ({ accept, onFiles, files }) => {
+    const text = files.length > 0 ? "Add more files" : "Choose files";
+
+    return (
+      <>
+        <label
+          style={{
+            backgroundColor: "#007bff",
+            color: "#fff",
+            cursor: "pointer",
+            padding: 15,
+            borderRadius: 3,
+            marginTop: 100,
+          }}
+        >
+          {text}
+          <input
+            style={{ display: "none" }}
+            type="file"
+            accept={accept}
+            multiple
+            onChange={(e) => {
+              getFilesFromEvent(e).then((chosenFiles) => {
+                onFiles(chosenFiles);
+              });
+            }}
+          />
+        </label>
         <button
           className={"absolute text-white hover:cursor-pointer"}
           onClick={async (e) => {
@@ -166,44 +204,8 @@ export const Upload = () => {
         >
           Finished
         </button>
-      </div>
-    ) : (
-      ""
+      </>
     );
-  };
-
-  const myInput = ({ accept, onFiles, files }) => {
-    const text = files.length > 0 ? "Add more files" : "Choose files";
-
-    return (
-      <label
-        style={{
-          backgroundColor: "#007bff",
-          color: "#fff",
-          cursor: "pointer",
-          padding: 15,
-          borderRadius: 3,
-          marginTop: 100,
-        }}
-      >
-        {text}
-        <input
-          style={{ display: "none" }}
-          type="file"
-          accept={accept}
-          multiple
-          onChange={(e) => {
-            getFilesFromEvent(e).then((chosenFiles) => {
-              onFiles(chosenFiles);
-            });
-          }}
-        />
-      </label>
-    );
-  };
-
-  const handleSubmit = (files, allFiles) => {
-    console.log("allfiles: ", allFiles);
   };
 
   return (
@@ -212,7 +214,6 @@ export const Upload = () => {
       InputComponent={myInput}
       LayoutComponent={myLayout}
       PreviewComponent={MyPreview}
-      onSubmit={handleSubmit}
       accept="image/*"
     />
   );
