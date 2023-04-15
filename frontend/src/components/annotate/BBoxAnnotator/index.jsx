@@ -63,13 +63,18 @@ const BBoxAnnotator = React.forwardRef(
 
     useEffect(() => {
       const maxWidth = bBoxAnnotatorRef.current?.offsetWidth || 1;
+      const maxHeight = bBoxAnnotatorRef.current?.offsetHeight || 1;
       const imageElement = new Image();
       imageElement.src = url;
 
       imageElement.onload = function () {
         const width = imageElement.width;
         const height = imageElement.height;
-        setMultiplier(width / maxWidth);
+        // setMultiplier(width / maxWidth);
+
+        // FIXME: Good for one or the other only; upload a single portrait image, fine. upload a single landscape image, fine. upload a mix of both, it's one or the other in terms of accurate coordinates.
+        const isPortrait = height > width;
+        setMultiplier(isPortrait ? height / maxHeight : width / maxWidth);
 
         setImageFrameStyle({
           backgroundImageSrc: imageElement.src,
