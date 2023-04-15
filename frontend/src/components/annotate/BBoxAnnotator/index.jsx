@@ -18,6 +18,7 @@ const BBoxAnnotator = React.forwardRef(
   (
     {
       selected,
+        setFinalEntries,
       files,
       entries,
       setEntries,
@@ -35,24 +36,24 @@ const BBoxAnnotator = React.forwardRef(
     // const [entries, setEntries] = useState(existingAnnotations);
     const [multiplier, setMultiplier] = useState(1);
 
+    const [submissionEntries, setSubmissionEntries] = useState([])
+
     useEffect(() => {
-      if (typeof onChange == "function") {
         // check if there are any entries present which are not undefined
         if (entries.some((entry) => entry !== undefined)) {
-          console.log("Entries are: ", entries);
-          // FIXME: tell it to only run onChange if existingAnnotations does not already contain the entry
-          // I don't understand why the annotation disappears after this onChange runs
-          //   onChange(
-          //     entries.map((entry) => ({
-          //       width: Math.round(entry.width * multiplier),
-          //       height: Math.round(entry.height * multiplier),
-          //       top: Math.round(entry.top * multiplier),
-          //       left: Math.round(entry.left * multiplier),
-          //       label: entry.label,
-          //     }))
-          //   );
+            setSubmissionEntries(
+              entries.map((entry) => ({
+                width: Math.round(entry.width * multiplier),
+                height: Math.round(entry.height * multiplier),
+                top: Math.round(entry.top * multiplier),
+                left: Math.round(entry.left * multiplier),
+                label: entry.label,
+                fileName: entry.fileName,
+                imgWidth: entry.imgWidth,
+                imgHeight: entry.imgHeight
+              }))
+            );
         }
-      }
     }, [entries, multiplier]);
 
     const [status, setStatus] = useState("free");
@@ -286,6 +287,10 @@ const BBoxAnnotator = React.forwardRef(
             entries[selected] &&
             entryItem(entries[selected], entries[selected].id)}
         </div>
+        <button onClick={(e) => {
+          //e.preventDefault()
+          setFinalEntries(submissionEntries)
+        }} className={'absolute z-50 text-white cursor-pointer'}>Finished</button>
       </div>
     );
   }

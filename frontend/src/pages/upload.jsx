@@ -11,30 +11,83 @@ export const Upload = () => {
   const [annotatedFiles, setAnnotatedFiles] = useState([]);
   const [files, setFiles] = useState([]);
   const [annotations, setAnnotations] = useState([]);
+  const [finalEntries, setFinalEntries] = useState([])
+
+    useEffect(() => {
+        console.log('Final entries change: ', finalEntries)
+    }, [finalEntries])
 
   const { token } = useContext(AuthContext);
 
+  // useEffect(() => {
+  //   if (files.length) {
+  //     // if the annotation's fileName attribute matches the name of one of our unnannotated files
+  //     const relevantAnnotation = annotations.find(
+  //       (annotation) => annotation.fileName === files[selected].file.name
+  //     );
+  //
+  //     if (relevantAnnotation) {
+  //       const relevantFile = files.find(
+  //         (file) => file.file.name === relevantAnnotation.fileName
+  //       );
+  //
+  //       const fileToBeAdded = {
+  //         file: relevantFile.file, // exclude all the metadata
+  //         annotation: relevantAnnotation,
+  //       };
+  //
+  //       setAnnotatedFiles([...annotatedFiles, fileToBeAdded]);
+  //     }
+  //   }
+  // }, [annotations]);
+
   useEffect(() => {
-    if (files.length) {
-      // if the annotation's fileName attribute matches the name of one of our unnannotated files
-      const relevantAnnotation = annotations.find(
-        (annotation) => annotation.fileName === files[selected].file.name
-      );
+      if (files.length) {
+          // if the annotation's fileName attribute matches the name of one of our unnannotated files
+          const relevantAnnotation = finalEntries.find(
+              (annotation) => annotation.fileName === files[selected].file.name
+          );
 
-      if (relevantAnnotation) {
-        const relevantFile = files.find(
-          (file) => file.file.name === relevantAnnotation.fileName
-        );
+          if (relevantAnnotation) {
+              const relevantFile = files.find(
+                  (file) => file.file.name === relevantAnnotation.fileName
+              );
 
-        const fileToBeAdded = {
-          file: relevantFile.file, // exclude all the metadata
-          annotation: relevantAnnotation,
-        };
+              const fileToBeAdded = {
+                  file: relevantFile.file, // exclude all the metadata
+                  annotation: relevantAnnotation,
+              };
 
-        setAnnotatedFiles([...annotatedFiles, fileToBeAdded]);
+              setAnnotatedFiles([...annotatedFiles, fileToBeAdded]);
+          }
       }
-    }
-  }, [annotations]);
+
+      // setAnnotatedFiles((prevAnnotatedFiles) => {
+      //     return prevAnnotatedFiles.map((annotatedFile) => {
+      //         const matchingEntry = finalEntries.find(
+      //             (entry) => entry.fileName === annotatedFile.file.name
+      //         );
+      //
+      //         console.log('MATCHING ENTRY: ', matchingEntry)
+      //
+      //         if (!matchingEntry) {
+      //             return annotatedFile;
+      //         }
+      //         const updatedAnnotations = {
+      //             ...annotatedFile.annotations,
+      //             ...matchingEntry,
+      //         };
+      //         return {
+      //             ...annotatedFile,
+      //             annotations: updatedAnnotations,
+      //         };
+      //     });
+      // });
+  }, [finalEntries])
+
+    useEffect(() => {
+        console.log('Annotated files change: ', annotatedFiles)
+    }, [annotatedFiles])
 
   // file status will change every time we add a file, since we've omitted the get upload params step
   const handleChangeStatus = (
@@ -101,39 +154,58 @@ export const Upload = () => {
   const MyPreview = ({ preview }) => {
     const labels = ["Cow", "Sheep"];
 
+
+
     // We've changed bbox annotator to allow entries to be passed in
     // So we should try to find a relevant annotation entry for the image we're looking at right now
-
-    // {"left":120,"top":94,"width":234,"height":133,"label":"Cow","id":"a8b6212e-eb41-4a1f-879d-827707b560e9","showCloseButton":false}
 
     return files[selected] ? (
       <div className={"m-auto h-full"}>
         <BBoxAnnotator
-          //existingAnnotations={annotatedFiles.map((entry => entry.annotation))}
-          //existingAnnotations={[{"left":120,"top":94,"width":234,"height":133,"label":"Cow","id":"a8b6212e-eb41-4a1f-879d-827707b560e9","showCloseButton":false}]}
           url={files[selected].meta.previewUrl}
           entries={annotations}
           selected={selected}
           files={files}
           setEntries={setAnnotations}
+          setFinalEntries={setFinalEntries}
           inputMethod="text"
           labels={labels}
-          // onChange={(annotationData) => {
-          //   if (annotationData.length) {
-          //     if (annotationData[0].label) {
-          //       setAnnotations((prevAnnotations) => [
-          //         ...prevAnnotations,
-          //         {
-          //           ...annotationData,
-          //           fileName: files[selected].file.name,
-          //           imgWidth: files[selected].meta.width,
-          //           imgHeight: files[selected].meta.height,
-          //         },
-          //       ]);
-          //     }
-          //   }
-          // }}
         />
+          <button
+            className={"absolute right-0 text-white hover:cursor-pointer"}
+            onClick={async (e) => {
+                console.log('Submitting')
+              if (annotatedFiles.length) {
+                const formData = new FormData();
+
+                  annotatedFiles.forEach((annotatedFile) => {
+                  formData.append("files[]", annotatedFile.file);
+                  formData.append(
+                    "annotations[]",
+                    JSON.stringify(annotatedFile.annotation)
+                  );
+                });
+
+                axios
+                  .post(
+                    `http://localhost:5000/api/roboflow/uploadWithAnnotation`,
+                    formData,
+                    {
+                      headers: {
+                        "Content-Type": "multipart/form-data",
+                        "x-auth-token": token,
+                      },
+                    }
+                  )
+                  .then((res) => console.log("API Response: ", res))
+                  .catch((e) => console.error("Error: ", e));
+              } else {
+                alert("Annotate some images before submitting");
+              }
+            }}
+          >
+            FINAL SUBMIT
+          </button>
       </div>
     ) : (
       ""
@@ -168,42 +240,40 @@ export const Upload = () => {
             }}
           />
         </label>
-        <button
-          className={"absolute text-white hover:cursor-pointer"}
-          onClick={async (e) => {
-            if (annotatedFiles.length) {
-              const formData = new FormData();
+        {/*<button*/}
+        {/*  className={"absolute text-white hover:cursor-pointer"}*/}
+        {/*  onClick={async (e) => {*/}
+        {/*    if (annotatedFiles.length) {*/}
+        {/*      const formData = new FormData();*/}
 
-              // FIXME: Needs to use original file dimensions, not dimens displayed on-screen
+        {/*      annotatedFiles.forEach((annotatedFile) => {*/}
+        {/*        formData.append("files[]", annotatedFile.file);*/}
+        {/*        formData.append(*/}
+        {/*          "annotations[]",*/}
+        {/*          JSON.stringify(annotatedFile.annotation)*/}
+        {/*        );*/}
+        {/*      });*/}
 
-              annotatedFiles.forEach((annotatedFile) => {
-                formData.append("files[]", annotatedFile.file);
-                formData.append(
-                  "annotations[]",
-                  JSON.stringify(annotatedFile.annotation)
-                );
-              });
-
-              axios
-                .post(
-                  `http://localhost:5000/api/roboflow/uploadWithAnnotation`,
-                  formData,
-                  {
-                    headers: {
-                      "Content-Type": "multipart/form-data",
-                      "x-auth-token": token,
-                    },
-                  }
-                )
-                .then((res) => console.log("API Response: ", res))
-                .catch((e) => console.error("Error: ", e));
-            } else {
-              alert("Annotate some images before submitting");
-            }
-          }}
-        >
-          Finished
-        </button>
+        {/*      axios*/}
+        {/*        .post(*/}
+        {/*          `http://localhost:5000/api/roboflow/uploadWithAnnotation`,*/}
+        {/*          formData,*/}
+        {/*          {*/}
+        {/*            headers: {*/}
+        {/*              "Content-Type": "multipart/form-data",*/}
+        {/*              "x-auth-token": token,*/}
+        {/*            },*/}
+        {/*          }*/}
+        {/*        )*/}
+        {/*        .then((res) => console.log("API Response: ", res))*/}
+        {/*        .catch((e) => console.error("Error: ", e));*/}
+        {/*    } else {*/}
+        {/*      alert("Annotate some images before submitting");*/}
+        {/*    }*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Finished*/}
+        {/*</button>*/}
       </>
     );
   };
