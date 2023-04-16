@@ -1,11 +1,17 @@
-import React, {useEffect, useLayoutEffect, useState} from "react";
+import React, {useContext, useEffect, useLayoutEffect, useState} from "react";
 import {Button} from '../components/Button'
 import axios from "axios";
 import {io} from 'socket.io-client'
+import {AuthContext} from "../utils/AuthContext";
 
 export const Home = () => {
-    const serverURL = `https://raid-middleman.herokuapp.com/`
+    //const serverURL = `https://raid-middleman.herokuapp.com/`
+    const serverURL = 'http://localhost:5000'
     const publicVapidKey = 'BM6G-d8QYWAUCE5C7CKxmSVmEnOgUJzOs-Dml88APJqKoC3Jv9DF2sn9_mTTsz0KHyYArGYkaw4Z7X0fbdKWAKk'
+
+    // you need to be authenticated to see this page, so we have a user
+    // just use their id as their screenshot folder name
+    const {user} = useContext(AuthContext)
 
     //connect to the socket server.
     const socket = io.connect(serverURL);
@@ -63,7 +69,12 @@ export const Home = () => {
                 <h1 className={'text-white text-base text-center mb-5 font-light'}>Motion was detected x times today</h1>
                 <img id={'img'} src={'https://placeholder.pics/svg/600/DEDEDE/555555/Attempting%20to%20load%20video%20feed...'}/>
                 <div className={'mt-2 mb-8'}>
-                    <Button btnText={'Screenshot'}/>
+                    <Button onClick={() => {
+                        // I will also add the type of detection. So eg the directory structure could be: userID/dogs, or userID/cats
+                        axios.get(`${serverURL}/api/screenshot?folderName=${user._id}`).then((res) => {
+                            console.log(res)
+                        }).catch((e) => console.error(e))
+                    }} btnText={'Screenshot'}/>
                     <Button onClick={() => {
 
                         axios.get(`${serverURL}/api/buzz`).then((res) => {
