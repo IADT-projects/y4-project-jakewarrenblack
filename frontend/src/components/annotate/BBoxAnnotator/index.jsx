@@ -18,7 +18,7 @@ const BBoxAnnotator = React.forwardRef(
   (
     {
       selected,
-        setFinalEntries,
+      setFinalEntries,
       files,
       entries,
       setEntries,
@@ -38,20 +38,25 @@ const BBoxAnnotator = React.forwardRef(
 
     const [submissionEntries, setSubmissionEntries] = useState([])
 
+      const [maxWidth, setMaxWidth] = useState(1)
+
     useEffect(() => {
         // check if there are any entries present which are not undefined
         if (entries.some((entry) => entry !== undefined)) {
             setSubmissionEntries(
-              entries.map((entry) => ({
-                width: Math.round(entry.width * multiplier),
-                height: Math.round(entry.height * multiplier),
-                top: Math.round(entry.top * multiplier),
-                left: Math.round(entry.left * multiplier),
-                label: entry.label,
-                fileName: entry.fileName,
-                imgWidth: entry.imgWidth,
-                imgHeight: entry.imgHeight
-              }))
+              entries.map((entry) => {
+                      const multiplier =entry.imgWidth/maxWidth
+                      return {
+                          width: Math.round(entry.width * multiplier),
+                          height: Math.round(entry.height * multiplier),
+                          top: Math.round(entry.top * multiplier),
+                          left: Math.round(entry.left * multiplier),
+                          label: entry.label,
+                          fileName: entry.fileName,
+                          imgWidth: entry.imgWidth,
+                          imgHeight: entry.imgHeight
+                      }
+              })
             );
         }
     }, [entries, multiplier]);
@@ -62,7 +67,7 @@ const BBoxAnnotator = React.forwardRef(
     const labelInputRef = useRef(null);
 
     useEffect(() => {
-      const maxWidth = bBoxAnnotatorRef.current?.offsetWidth || 1;
+      setMaxWidth(bBoxAnnotatorRef.current?.offsetWidth || 1)
       const maxHeight = bBoxAnnotatorRef.current?.offsetHeight || 1;
       const imageElement = new Image();
       imageElement.src = url;
@@ -70,11 +75,9 @@ const BBoxAnnotator = React.forwardRef(
       imageElement.onload = function () {
         const width = imageElement.width;
         const height = imageElement.height;
-        // setMultiplier(width / maxWidth);
 
-        // FIXME: Good for one or the other only; upload a single portrait image, fine. upload a single landscape image, fine. upload a mix of both, it's one or the other in terms of accurate coordinates.
-        const isPortrait = height > width;
-        setMultiplier(isPortrait ? height / maxHeight : width / maxWidth);
+
+          setMultiplier(width/maxWidth)
 
         setImageFrameStyle({
           backgroundImageSrc: imageElement.src,
