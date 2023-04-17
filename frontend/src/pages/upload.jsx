@@ -212,6 +212,7 @@ export const Upload = () => {
   };
 
   return (
+  <div style={{ height: "calc(100vh - 85px)" }}>
     <Dropzone
       onChangeStatus={handleChangeStatus}
       InputComponent={myInput}
@@ -219,5 +220,6 @@ export const Upload = () => {
       PreviewComponent={MyPreview}
       accept="image/*"
     />
+  </div>
   );
 };

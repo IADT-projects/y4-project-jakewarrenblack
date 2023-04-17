@@ -19,7 +19,7 @@ export const CaptureCard = ({caption, src, count, onClick}) => {
     return (
 
         /*Couple of pixels of bg image visible at bottom left of card (above caption) if entire bg image is rounded-md */
-        <div style={{backgroundImage:`url(${src})`}} className={'max-h-40 rounded-md rounded-b-lg h-screen h-40 bg-cover mt-1 flex flex-col justify-end items-center'}>
+        <div style={{backgroundImage:`url(${src})`}} className={'max-h-40 bg-center rounded-md rounded-b-lg h-screen h-40 bg-cover mt-1 flex flex-col justify-end items-center'}>
             {/* outer div is for bg image */}
             <div className={'bg-navyLight w-full flex justify-center items-center rounded-b-md'}>
                 <h2 className={'text-white my-1 font-semibold'}>{caption}</h2>

@@ -13,10 +13,14 @@ import hedgehog from "../Assets/animals/hedgehog.jpg";
 import raccoon from "../Assets/animals/raccoon.jpg";
 import squirrel from "../Assets/animals/squirrel.jpg";
 import rabbit from "../Assets/animals/rabbit.jpg";
+import manualCapture from "../Assets/animals/manualCapture.jpg";
 import { Link } from "react-router-dom";
 
 export const Captures = () => {
   const labels = [
+    {src: dog, name:'Dog'},
+    { src: cat, name: "Cat" },
+    { src: manualCapture, name: "Manual" },
     { src: bear, name: "Bear" },
     { src: crow, name: "Crow" },
     { src: deer, name: "Deer" },
@@ -24,8 +28,7 @@ export const Captures = () => {
     { src: rabbit, name: "Rabbit" },
     { src: raccoon, name: "Raccoon" },
     { src: squirrel, name: "Squirrel" },
-    { src: cat, name: "Cat" },
-    // {src: dog, name:'Dog'},
+
   ];
 
   const AnimalCaptures = () => {
@@ -42,16 +45,10 @@ export const Captures = () => {
         <h1 className={"text-center text-3xl font-medium text-white"}>
           Captures
         </h1>
-        <h1 className={"mb-5 text-center text-base font-light text-white"}>
-          This week's captures
-        </h1>
-        <div className={"mt-2 mb-2"}>
-          <Button onClick={() => {}} btnText={"Animal Spotted"} />
-        </div>
 
-        <div className={"grid w-full grid-cols-2 gap-1"}>
+        <div className={"flex w-full flex-col gap-1 mb-20 mt-5 space-y-2"}>
           {labels.map(({ src, name }) => (
-            <Link to={"/captures/:animal"} element={<AnimalCaptures />}>
+            <Link to={`/captures/${name}`} element={<AnimalCaptures />}>
               <CaptureCard src={src} caption={name} />
             </Link>
           ))}

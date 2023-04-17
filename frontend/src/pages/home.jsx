@@ -11,7 +11,7 @@ export const Home = () => {
 
     // you need to be authenticated to see this page, so we have a user
     // just use their id as their screenshot folder name
-    const {user} = useContext(AuthContext)
+    const {user, token} = useContext(AuthContext)
 
     //connect to the socket server.
     const socket = io.connect(serverURL);
@@ -69,9 +69,9 @@ export const Home = () => {
                 <h1 className={'text-white text-base text-center mb-5 font-light'}>Motion was detected x times today</h1>
                 <img id={'img'} src={'https://placeholder.pics/svg/600/DEDEDE/555555/Attempting%20to%20load%20video%20feed...'}/>
                 <div className={'mt-2 mb-8'}>
-                    <Button onClick={() => {
+                    <Button onClick={async () => {
                         // I will also add the type of detection. So eg the directory structure could be: userID/dogs, or userID/cats
-                        axios.get(`${serverURL}/api/screenshot?folderName=${user._id}`).then((res) => {
+                        return await axios.get(`${serverURL}/api/screenshot`, {headers: {'x-auth-token': token}}).then((res) => {
                             console.log(res)
                         }).catch((e) => console.error(e))
                     }} btnText={'Screenshot'}/>

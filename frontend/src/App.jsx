@@ -21,6 +21,7 @@ import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
 import { Labelling } from "./pages/labelling";
 import { Upload } from "./pages/upload";
+import {SingleAnimal} from "./pages/singleAnimal";
 
 function App() {
   // So when user refreshes page, check for a token, and just log them in again
@@ -53,7 +54,6 @@ function App() {
     <>
       {/* Height of container fills screen but excludes bottom navigation in its height */}
       <div
-        style={{ height: "calc(100vh - 85px)" }}
         className={
           "m-auto flex w-full w-[800px] flex-col items-center justify-center bg-navy p-2 [&>*]:w-full"
         }
@@ -69,6 +69,8 @@ function App() {
               <Route path="/pair" element={<Pairing />} />
 
               <Route path="/captures" element={<Captures />} />
+              <Route path="/captures/:animal" element={<SingleAnimal />} />
+
               <Route path="/pets" element={<Pets />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
