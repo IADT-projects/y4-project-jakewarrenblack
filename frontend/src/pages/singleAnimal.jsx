@@ -18,8 +18,6 @@ export const SingleAnimal = (props) => {
     }, [])
 
 
-
-
     return (
         <div className={'w-full flex justify-center items-center flex-col w-[800px] [&>*]:w-full m-auto p-2 bg-navy'}>
             <div className={'[&>*]:w-full flex flex-col'}>

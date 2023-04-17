@@ -3,6 +3,7 @@ import {Button} from '../components/Button'
 import axios from "axios";
 import {io} from 'socket.io-client'
 import {AuthContext} from "../utils/AuthContext";
+import {useLocation} from "react-router-dom";
 
 export const Home = () => {
     //const serverURL = `https://raid-middleman.herokuapp.com/`
@@ -13,50 +14,66 @@ export const Home = () => {
     // just use their id as their screenshot folder name
     const {user, token} = useContext(AuthContext)
 
+    const location = useLocation()
+
     //connect to the socket server.
-    const socket = io.connect(serverURL);
+    const socket = io.connect(serverURL, {
+        auth: {
+            token: token
+        }
+    });
 
     useEffect(() => {
-        // array buffer to base64 encoded string
-        socket.on("sendImage", function (base64string) {
-             document.getElementById('img').src = `data:image/jpeg;base64,${base64string}`
-        });
+            // array buffer to base64 encoded string
 
-            socket.on("detection", function (detectionLabel) {
-            console.log(detectionLabel)
+            const imgElement = document.getElementById('img');
+            if (imgElement) {
+                socket.on("sendImage", function (base64string) {
+                    imgElement.src = `data:image/jpeg;base64,${base64string}`;
+                });
+            }
+
+            socket.on("notifyDetection", function (detectionLabel) {
+                console.log(detectionLabel)
 
 
 
-            // Register service worker, register push, send push
-            // async function send(){
-            //     // Register service worker
-            //     console.log('Registering service worker...')
-            //     const register = await navigator.serviceWorker.register('../serviceworker.js')
-            //     console.log('Service worker registered')
-            //
-            //     // Register push
-            //     console.log('Registering push...')
-            //     const subscription = await register.pushManager.subscribe({
-            //         userVisibleOnly: true,
-            //         applicationServerKey: publicVapidKey
-            //     })
-            //     console.log('Push registered...')
-            //
-            //     // Send a push notification
-            //     // we send our subscription object to our node backend, via the subscribe route
-            //     await fetch(`${serverURL}/subscribe`, {
-            //         method: 'POST',
-            //         body: JSON.stringify(subscription),
-            //         headers: {
-            //             'content-type': 'application/json'
-            //         }
-            //     })
-            //
-            //     console.log('Push sent')
-            // }
-            //
-            // send().catch(err => console.error(err))
-        });
+                // Register service worker, register push, send push
+                // async function send(){
+                //     // Register service worker
+                //     console.log('Registering service worker...')
+                //     const register = await navigator.serviceWorker.register('../serviceworker.js')
+                //     console.log('Service worker registered')
+                //
+                //     // Register push
+                //     console.log('Registering push...')
+                //     const subscription = await register.pushManager.subscribe({
+                //         userVisibleOnly: true,
+                //         applicationServerKey: publicVapidKey
+                //     })
+                //     console.log('Push registered...')
+                //
+                //     // Send a push notification
+                //     // we send our subscription object to our node backend, via the subscribe route
+                //     await fetch(`${serverURL}/subscribe`, {
+                //         method: 'POST',
+                //         body: JSON.stringify(subscription),
+                //         headers: {
+                //             'content-type': 'application/json'
+                //         }
+                //     })
+                //
+                //     console.log('Push sent')
+                // }
+                //
+                // send().catch(err => console.error(err))
+            });
+
+        // Cleanup function
+        return () => {
+            socket.off("sendImage");
+            socket.off("detection");
+        };
 
     }, [socket])
 

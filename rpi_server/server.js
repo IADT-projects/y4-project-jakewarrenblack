@@ -28,7 +28,11 @@ const socketServer = new Server(httpServer, {
 
 //const serverURL = 'https://raid-middleman.herokuapp.com/'
 const serverURL = 'http://localhost:5000'
-const socketClient = io.connect(serverURL);
+const socketClient = io.connect(serverURL, {
+    extraHeaders: {
+        'x-is-pi': 'true'
+    }
+});
 
 // socketClient.on("connection", function (base64string) {
 //     console.log('Pi connected to the server')
@@ -43,8 +47,18 @@ const socketClient = io.connect(serverURL);
 
 
 
-let prevLabel;
-let emitCount = 10;
+/*
+* So it runs every 500ms
+* If res.text -> potentially saw something
+* Increment a counter after every iteration, up to a total of 5 -> which is 2.5 seconds in real time
+* Every time we iterate, if the response has a label (some detection) -> push to array out here
+* If the response does not have a label (no detection) -> reset the counter to 0 and empty the array
+* If we reach the top of the counter and the array is not empty, it probably is actually seeing something and not a false positive
+*/
+
+let counter = 0;
+let labels = []
+
 
 setInterval(() => {
         // run object detection
@@ -52,12 +66,35 @@ setInterval(() => {
             let image;
 
             if(res.img){
-                // was doing it this way: btoa(String.fromCharCode(...new Uint8Array(res.img)));
-                // but caused stack overflow
                 image = encode(res.img) // this is an array buffer until converted to base64
-
                 socketClient.emit('receiveImage', image);
             }
+
+
+            // means there is a label, potentially saw something
+            if(res.text){
+
+               // up to 2.5 seconds (500ms per iteration)
+               if(counter < 5){
+                    labels.push(res.text)
+                    counter++
+               }
+               else{
+                    if(labels.length){
+                        // means we've reached the last iteration of the counter and there are still items in the array
+                        // so we've gone through 5 iterations where the response had a label/saw an object
+                        socketClient.emit('detection', res.text);
+                        labels = []
+                        counter = 0;
+                    }
+               }
+
+            }
+            else{
+                labels = []
+                counter = 0;
+            }
+
 
             // if(res.text){
             //     // if e.g. we just detected a person, then detect a person again immediately afterward, don't notify for that
