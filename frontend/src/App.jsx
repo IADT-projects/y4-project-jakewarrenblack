@@ -20,7 +20,7 @@ import { Settings } from "./pages/settings";
 import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
 import { Upload } from "./pages/upload";
-import {SingleAnimal} from "./pages/singleAnimal";
+import { SingleAnimal } from "./pages/singleAnimal";
 
 function App() {
   // So when user refreshes page, check for a token, and just log them in again

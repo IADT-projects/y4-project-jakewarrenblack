@@ -17,11 +17,8 @@ export const LoginRegister = () => {
     });
 
     const handleForm = (e) => {
-      console.log(e.target.value);
       let name = e.target.name;
       let value = e.target.value;
-
-      console.table(name, value);
 
       setForm((prevState) => ({
         ...prevState,

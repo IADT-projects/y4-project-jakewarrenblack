@@ -62,6 +62,8 @@ export const AuthProvider = (props) => {
     setLoading(true);
     setError(null);
 
+    console.log("login user with email");
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/login",
@@ -154,7 +156,7 @@ export const AuthProvider = (props) => {
       await loginUserWithEmail(formData, location);
     } catch (err) {
       if (err) {
-        setError(err.response.data.message);
+        setError(err);
 
         console.log("Email/PW auth error:", {
           error: err,
