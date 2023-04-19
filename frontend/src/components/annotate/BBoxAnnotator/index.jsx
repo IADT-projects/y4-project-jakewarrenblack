@@ -1,8 +1,10 @@
-import React, { useRef, useEffect, useState, useImperativeHandle } from "react";
+import React, { useRef, useEffect, useState, useImperativeHandle, useContext } from "react";
 import { createUseStyles } from "react-jss";
 import { v4 as uuid } from "uuid";
 import BBoxSelector from "../BBoxSelector";
 import LabelBox from "../LabelBox";
+import axios from "axios";
+import {AuthContext} from "../../../utils/AuthContext";
 
 const useStyles = createUseStyles({
   bBoxAnnotator: {
@@ -18,7 +20,6 @@ const BBoxAnnotator = React.forwardRef(
   (
     {
       selected,
-      setFinalEntries,
       files,
       entries,
       setEntries,
@@ -33,12 +34,15 @@ const BBoxAnnotator = React.forwardRef(
     const classes = useStyles();
     const [pointer, setPointer] = useState(null);
     const [offset, setOffset] = useState(null);
-    // const [entries, setEntries] = useState(existingAnnotations);
     const [multiplier, setMultiplier] = useState(1);
-
     const [submissionEntries, setSubmissionEntries] = useState([])
+    const [maxWidth, setMaxWidth] = useState(1)
+    const [annotatedFiles, setAnnotatedFiles] = useState([])
+    const [finalEntries, setFinalEntries] = useState([])
 
-      const [maxWidth, setMaxWidth] = useState(1)
+    const { token } = useContext(AuthContext);
+
+
 
     useEffect(() => {
         // check if there are any entries present which are not undefined
@@ -145,10 +149,6 @@ const BBoxAnnotator = React.forwardRef(
     }, [status, labelInputRef]);
 
     const addEntry = (label) => {
-      //   setEntries([
-      //     ...entries,
-      //     { ...rect, label, id: uuid(), showCloseButton: false },
-      //   ]);
 
       const newEntry = {
         ...rect,
@@ -206,7 +206,7 @@ const BBoxAnnotator = React.forwardRef(
     const entryItem = (entry, i) => {
       return entry ? (
         <div
-          className={"absolute absolute border-2 border-red-500 text-red-500"}
+          className={"absolute absolute border-2 border-red-500 text-white"}
           style={{
             top: `${entry.top - borderWidth}px`,
             left: `${entry.left - borderWidth}px`,
@@ -214,8 +214,7 @@ const BBoxAnnotator = React.forwardRef(
             height: `${entry.height}px`,
           }}
           key={i}
-          //onMouseOver={() => setEntries((prevEntries) => prevEntries.map((e) => (e.id === entry.id ? { ...e, showCloseButton: true } : e)))}
-          //onMouseLeave={() => setEntries((prevEntries) => prevEntries.map((e) => (e.id === entry.id ? { ...e, showCloseButton: false } : e)))}
+
         >
           <div
             className={
@@ -250,7 +249,7 @@ const BBoxAnnotator = React.forwardRef(
             </div>
           </div>
 
-          <div style={{ overflow: "hidden" }}>{entry.label}</div>
+          <div style={{outline: '2px solid red'}} className={'px-4 w-max overflow-hidden -mt-8 bg-red-500 w-min text-2xl'}>{entry.label}</div>
         </div>
       ) : (
         ""
@@ -258,6 +257,85 @@ const BBoxAnnotator = React.forwardRef(
     };
 
     const rect = rectangle();
+
+      useEffect(async () => {
+          if (files.length && finalEntries.length) {
+              // return array of promises, wait for it to finish before running submitEntries()
+              const promises = finalEntries.map(async (entry) => {
+                  // entry being the value returned from BBoxAnnotator with the appropriately transformed values...
+                  // need to pair them where file.name matches annotation.fileName
+                  // if the annotation's fileName attribute matches the name of one of our unnannotated files
+                  // when looking at an entry, i have access to the filename
+
+                  const relevantFile = files.find((file) => file.file.name === entry.fileName);
+
+                  console.log('Relevant file: ', relevantFile);
+
+                  if (relevantFile) {
+                      const fileToBeAdded = {
+                          file: relevantFile.file, // exclude all the metadata
+                          annotation: entry,
+                      };
+
+                      setAnnotatedFiles((prevAnnotatedFiles) => [...prevAnnotatedFiles, fileToBeAdded]);
+                  }
+              });
+
+              await Promise.all(promises)
+          }
+      }, [finalEntries]);
+
+      useEffect(async() => {
+          if(annotatedFiles.length) {
+              await submitEntries()
+                  .then((res) => {
+                      console.log('Submit success: ', res)
+                      alert('Success')
+                  })
+                  .catch((e) => {
+                      console.log('Submit error: ', e)
+                      alert('Something went wrong')
+                  })
+          }
+      }, [annotatedFiles])
+
+
+      const submitEntries = async () => {
+          return new Promise(async (resolve, reject) => {
+              console.log('Submitting')
+
+              if (annotatedFiles.length) {
+                      const formData = new FormData();
+
+                      annotatedFiles.forEach((annotatedFile) => {
+                          formData.append("files[]", annotatedFile.file);
+                          formData.append(
+                              "annotations[]",
+                              JSON.stringify(annotatedFile.annotation)
+                          );
+                      });
+
+                      console.log('The entries that would be submitted are: ', annotatedFiles)
+
+                      await axios
+                          .post(
+                              `http://localhost:5000/api/roboflow/uploadWithAnnotation`,
+                              formData,
+                              {
+                                  headers: {
+                                      "Content-Type": "multipart/form-data",
+                                      "x-auth-token": token,
+                                  }
+                              }
+                          )
+                          .then((res) => resolve(res))
+                          .catch((e) => reject(e));
+              }
+              else{
+                  reject('Annotate files first')
+              }
+          })
+      }
 
     return (
       <div
@@ -290,15 +368,16 @@ const BBoxAnnotator = React.forwardRef(
             />
           ) : null}
 
-          {/* {entries.map((entry, i) => entryItem(entry, i))} */}
+
           {entries.length &&
             entries[selected] &&
             entryItem(entries[selected], entries[selected].id)}
         </div>
-        <button onClick={(e) => {
-          //e.preventDefault()
-          setFinalEntries(submissionEntries)
-        }} className={'absolute z-50 text-white cursor-pointer'}>Finished</button>
+          <div className={'w-full flex justify-center align-center'}>
+            <button onClick={(e) => {
+              setFinalEntries(submissionEntries)
+            }} className={'bg-blue-600 w-1/3 rounded-sm p-3 text-white absolute mt-2 cursor-pointer'}>Finished</button>
+          </div>
       </div>
     );
   }

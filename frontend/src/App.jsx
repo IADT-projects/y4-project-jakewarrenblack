@@ -19,7 +19,6 @@ import { Pets } from "./pages/pets";
 import { Settings } from "./pages/settings";
 import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
-import { Labelling } from "./pages/labelling";
 import { Upload } from "./pages/upload";
 import {SingleAnimal} from "./pages/singleAnimal";
 
