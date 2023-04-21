@@ -178,8 +178,9 @@ export const AuthProvider = (props) => {
         // fine, they can continue to wherever they were going
         return true;
       }
+    } else {
+      return false;
     }
-    return false;
   };
 
   const authContextValues = {

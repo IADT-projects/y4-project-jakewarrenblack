@@ -15,7 +15,7 @@ import { Home } from "./pages/home";
 import { LoginRegister } from "./pages/login_register";
 import { Pairing } from "./pages/pairing";
 import { Captures } from "./pages/captures";
-import { Pets } from "./pages/pets";
+import { Pet } from "./pages/pets";
 import { Settings } from "./pages/settings";
 import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
@@ -35,7 +35,7 @@ function App() {
       await loginUserWithOauth(cookieJwt)
         .then((res) => {
           // navigate(outlet.location.pathname);
-          if (!hasGeneratedVersion) {
+          if (!hasGeneratedVersion()) {
             navigate("/home");
           } else {
             navigate("/upload");
@@ -70,7 +70,7 @@ function App() {
               <Route path="/captures" element={<Captures />} />
               <Route path="/captures/:animal" element={<SingleAnimal />} />
 
-              <Route path="/pets" element={<Pets />} />
+              <Route path="/pet" element={<Pet />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Routes>
