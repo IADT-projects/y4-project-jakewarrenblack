@@ -5,21 +5,41 @@ import { getDroppedOrSelectedFiles } from "html5-file-selector";
 import BBoxAnnotator from "../components/annotate";
 import axios from "axios";
 import { AuthContext } from "../utils/AuthContext";
+const { token } = useContext(AuthContext);
 
 export const Upload = () => {
-  const [selected, setSelected] = useState(0);;
+  const [selected, setSelected] = useState(0);
   const [files, setFiles] = useState([]);
   const [annotations, setAnnotations] = useState([]);
 
-
   // file status will change every time we add a file, since we've omitted the get upload params step
-  const handleChangeStatus = (
+  const handleChangeStatus = async (
     fileWithMetadata,
     status,
     allFilesWithMetadata
   ) => {
     if (status === "done") {
       setFiles([...files, fileWithMetadata]);
+
+      // 1. get these files
+      // 2. send them to the middleman server
+      // 3. on the middleman server, we also have our pet detection model
+      // 4. middleman passes every image through the model, gets the coordinates, and sends them back here
+      // 5. we send the images into the bbox annotator which displays the annotations on screen
+      // 6. user can review and change them, or just submit if they're happy with the annotations
+      const formData = new FormData();
+
+      formData.append("files[]", allFilesWithMetadata); // is this the right one?
+
+      await axios
+        .post(`http://localhost:5000/api/auto-annotate/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "x-auth-token": token,
+          },
+        })
+        .then((res) => resolve(res))
+        .catch((e) => reject(e));
     }
   };
 
@@ -40,9 +60,7 @@ export const Upload = () => {
         </div>
         <div className={"flex flex-col"}>
           <div
-            className={
-              "flex w-full justify-between px-4 text-5xl text-white"
-            }
+            className={"flex w-full justify-between px-4 text-5xl text-white"}
           >
             {/* If on 0, don't let the user go back, if on the end, go back to the start */}
             <button
@@ -75,7 +93,6 @@ export const Upload = () => {
   };
 
   const MyPreview = ({ preview }) => {
-
     // We've changed bbox annotator to allow entries to be passed in
     // So we should try to find a relevant annotation entry for the image we're looking at right now
 
@@ -99,32 +116,32 @@ export const Upload = () => {
     const text = files.length > 0 ? "Add more files" : "Choose files";
 
     return (
-        <label className={'bg-blue-600 text-white cursor-pointer rounded-sm p-3'}>
-          {text}
-          <input
-            style={{ display: "none" }}
-            type="file"
-            accept={accept}
-            multiple
-            onChange={(e) => {
-              getFilesFromEvent(e).then((chosenFiles) => {
-                onFiles(chosenFiles);
-              });
-            }}
-          />
-        </label>
+      <label className={"cursor-pointer rounded-sm bg-blue-600 p-3 text-white"}>
+        {text}
+        <input
+          style={{ display: "none" }}
+          type="file"
+          accept={accept}
+          multiple
+          onChange={(e) => {
+            getFilesFromEvent(e).then((chosenFiles) => {
+              onFiles(chosenFiles);
+            });
+          }}
+        />
+      </label>
     );
   };
 
   return (
-  <div style={{ height: "calc(100vh - 85px)" }}>
-    <Dropzone
-      onChangeStatus={handleChangeStatus}
-      InputComponent={myInput}
-      LayoutComponent={myLayout}
-      PreviewComponent={MyPreview}
-      accept="image/*"
-    />
-  </div>
+    <div style={{ height: "calc(100vh - 85px)" }}>
+      <Dropzone
+        onChangeStatus={handleChangeStatus}
+        InputComponent={myInput}
+        LayoutComponent={myLayout}
+        PreviewComponent={MyPreview}
+        accept="image/*"
+      />
+    </div>
   );
 };
