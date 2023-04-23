@@ -59,6 +59,14 @@ const BBoxAnnotator = React.forwardRef(
                           fileName: entry.fileName,
                           imgWidth: entry.imgWidth,
                           imgHeight: entry.imgHeight
+                          // width: Math.round(entry.width),
+                          // height: Math.round(entry.height),
+                          // top: Math.round(entry.top),
+                          // left: Math.round(entry.left),
+                          // label: entry.label,
+                          // fileName: entry.fileName,
+                          // imgWidth: entry.imgWidth,
+                          // imgHeight: entry.imgHeight
                       }
               })
             );
@@ -185,6 +193,7 @@ const BBoxAnnotator = React.forwardRef(
     };
 
     const rectangle = () => {
+        console.log('rect update')
       const x1 = offset && pointer ? Math.min(offset.x, pointer.x) : 0;
       const x2 = offset && pointer ? Math.max(offset.x, pointer.x) : 0;
       const y1 = offset && pointer ? Math.min(offset.y, pointer.y) : 0;

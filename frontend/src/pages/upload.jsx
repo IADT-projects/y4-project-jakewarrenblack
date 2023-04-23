@@ -9,7 +9,7 @@ import {LoginRegister} from "./login_register";
 
 
 export const Upload = () => {
-  //const [numChosenFiles, setNumChosenFiles] = useState(0)
+  const [numChosenFiles, setNumChosenFiles] = useState(0)
   const [selected, setSelected] = useState(0);
   const [files, setFiles] = useState([]);
   const [annotations, setAnnotations] = useState([]);
@@ -37,52 +37,53 @@ export const Upload = () => {
     }
   };
 
-  // const [autoAnnotatedFiles, setAutoAnnotatedFiles] = useState([])
-  //
-  // useEffect(async () => {
-  //   if(files.length === numChosenFiles){
-  //     const formData = new FormData();
-  //
-  //     console.log('all files with metadata: ', files)
-  //
-  //     files.forEach((file) => {
-  //       formData.append("files[]", file.file);
-  //       formData.append('dimensions[]', JSON.stringify({width: file.meta.width, height: file.meta.height}));
-  //     })
+  const [autoAnnotatedFiles, setAutoAnnotatedFiles] = useState([])
+
+  useEffect(async () => {
+    if(files.length === numChosenFiles){
+      const formData = new FormData();
+
+      console.log('all files with metadata: ', files)
+
+      files.forEach((file) => {
+        formData.append("files[]", file.file);
+        formData.append('dimensions[]', JSON.stringify({width: file.meta.width, height: file.meta.height}));
+      })
 
       // on the server-side, images are resized to 640x640, which is a more suitable size for the model
       // at the end of the day all the images are converted to 640x640 once they're on roboflow anyway, so won't affect that side of things
-
+      //
       // i receive a buffer of the resized image from this endpoint
       // finally pass the resized image file and the auto annotations to the bbox annotator for display
 
-      // await axios
-      //     .post(`http://localhost:5000/api/auto-annotate/`, formData, {
-      //       headers: {
-      //         "Content-Type": "multipart/form-data",
-      //         "x-auth-token": token,
-      //       },
-      //     })
-      //     .then((res) => {
-      //       console.log('Auto annotations received: ', res)
-      //
-      //       setAnnotations(res.data.annotations.map((annotatedFile) => {
-      //         return {
-      //           previewUrl: annotatedFile.base64,
-      //           width: annotatedFile.width,
-      //           height: annotatedFile.height,
-      //           top: annotatedFile.y,
-      //           left: annotatedFile.x,
-      //           label: 'test',
-      //           fileName: annotatedFile.name,
-      //           imgWidth: 640,
-      //           imgHeight: 640
-      //         }
-      //       }))
-      //     })
-      //     .catch((e) => console.log(e));
-    //}
-  //}, [files])
+      console.log('auto annotate req')
+      await axios
+          .post(`http://localhost:5000/api/auto-annotate/`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "x-auth-token": token,
+            },
+          })
+          .then((res) => {
+            console.log('Auto annotations received: ', res)
+
+            setAnnotations(res.data.annotations.map((annotatedFile) => {
+              return {
+                previewUrl: annotatedFile.base64,
+                width: annotatedFile.width,
+                height: annotatedFile.height,
+                top: annotatedFile.y,
+                left: annotatedFile.x,
+                label: 'test',
+                fileName: annotatedFile.name,
+                imgWidth: 640,
+                imgHeight: 640
+              }
+            }))
+          })
+          .catch((e) => console.log(e));
+    }
+  }, [files])
 
   const myLayout = ({
     input,
@@ -128,7 +129,7 @@ export const Upload = () => {
   const getFilesFromEvent = (e) => {
     return new Promise((resolve) => {
       getDroppedOrSelectedFiles(e).then((chosenFiles) => {
-        //setNumChosenFiles(chosenFiles.length)
+        setNumChosenFiles(chosenFiles.length)
         resolve(chosenFiles.map((f) => f.fileObject));
       });
     });
@@ -141,7 +142,7 @@ export const Upload = () => {
     return files[selected] ? (
       <div className={"m-auto h-full"}>
         <BBoxAnnotator
-          url={files[selected].meta.previewUrl}
+          url={annotations[selected]?.previewUrl ? `data:image/png;base64,${annotations[selected].previewUrl}` : files[selected].meta.previewUrl}
           entries={annotations}
           selected={selected}
           files={files}
