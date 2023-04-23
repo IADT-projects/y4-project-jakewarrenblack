@@ -5,12 +5,16 @@ import { getDroppedOrSelectedFiles } from "html5-file-selector";
 import BBoxAnnotator from "../components/annotate";
 import axios from "axios";
 import { AuthContext } from "../utils/AuthContext";
-const { token } = useContext(AuthContext);
+import {LoginRegister} from "./login_register";
+
 
 export const Upload = () => {
+  //const [numChosenFiles, setNumChosenFiles] = useState(0)
   const [selected, setSelected] = useState(0);
   const [files, setFiles] = useState([]);
   const [annotations, setAnnotations] = useState([]);
+
+  const { token } = useContext(AuthContext);
 
   // file status will change every time we add a file, since we've omitted the get upload params step
   const handleChangeStatus = async (
@@ -19,6 +23,8 @@ export const Upload = () => {
     allFilesWithMetadata
   ) => {
     if (status === "done") {
+      console.log('all files with meta: ', allFilesWithMetadata)
+
       setFiles([...files, fileWithMetadata]);
 
       // 1. get these files
@@ -27,21 +33,56 @@ export const Upload = () => {
       // 4. middleman passes every image through the model, gets the coordinates, and sends them back here
       // 5. we send the images into the bbox annotator which displays the annotations on screen
       // 6. user can review and change them, or just submit if they're happy with the annotations
-      const formData = new FormData();
 
-      formData.append("files[]", allFilesWithMetadata); // is this the right one?
-
-      await axios
-        .post(`http://localhost:5000/api/auto-annotate/`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "x-auth-token": token,
-          },
-        })
-        .then((res) => resolve(res))
-        .catch((e) => reject(e));
     }
   };
+
+  // const [autoAnnotatedFiles, setAutoAnnotatedFiles] = useState([])
+  //
+  // useEffect(async () => {
+  //   if(files.length === numChosenFiles){
+  //     const formData = new FormData();
+  //
+  //     console.log('all files with metadata: ', files)
+  //
+  //     files.forEach((file) => {
+  //       formData.append("files[]", file.file);
+  //       formData.append('dimensions[]', JSON.stringify({width: file.meta.width, height: file.meta.height}));
+  //     })
+
+      // on the server-side, images are resized to 640x640, which is a more suitable size for the model
+      // at the end of the day all the images are converted to 640x640 once they're on roboflow anyway, so won't affect that side of things
+
+      // i receive a buffer of the resized image from this endpoint
+      // finally pass the resized image file and the auto annotations to the bbox annotator for display
+
+      // await axios
+      //     .post(`http://localhost:5000/api/auto-annotate/`, formData, {
+      //       headers: {
+      //         "Content-Type": "multipart/form-data",
+      //         "x-auth-token": token,
+      //       },
+      //     })
+      //     .then((res) => {
+      //       console.log('Auto annotations received: ', res)
+      //
+      //       setAnnotations(res.data.annotations.map((annotatedFile) => {
+      //         return {
+      //           previewUrl: annotatedFile.base64,
+      //           width: annotatedFile.width,
+      //           height: annotatedFile.height,
+      //           top: annotatedFile.y,
+      //           left: annotatedFile.x,
+      //           label: 'test',
+      //           fileName: annotatedFile.name,
+      //           imgWidth: 640,
+      //           imgHeight: 640
+      //         }
+      //       }))
+      //     })
+      //     .catch((e) => console.log(e));
+    //}
+  //}, [files])
 
   const myLayout = ({
     input,
@@ -87,6 +128,7 @@ export const Upload = () => {
   const getFilesFromEvent = (e) => {
     return new Promise((resolve) => {
       getDroppedOrSelectedFiles(e).then((chosenFiles) => {
+        //setNumChosenFiles(chosenFiles.length)
         resolve(chosenFiles.map((f) => f.fileObject));
       });
     });

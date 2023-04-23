@@ -47,7 +47,7 @@ export const Pet = () => {
         {data && data.petName}
       </h1>
 
-      {data && (
+      {data ? (
         <div>
           <img
             className="max-h-64 w-full object-cover object-center"
@@ -101,6 +101,10 @@ export const Pet = () => {
             </div>
           </div>
         </div>
+      ) : (
+          <div>
+            <h1 className={'text-white'}>No models found</h1>
+          </div>
       )}
     </div>
   );
