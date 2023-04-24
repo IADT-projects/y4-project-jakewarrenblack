@@ -70,14 +70,14 @@ export const Upload = () => {
             setAnnotations(res.data.annotations.map((annotatedFile) => {
               return {
                 previewUrl: annotatedFile.base64,
-                width: annotatedFile.width,
-                height: annotatedFile.height,
+                width: (annotatedFile.width - annotatedFile.x),
+                height: (annotatedFile.height - annotatedFile.y),
                 top: annotatedFile.y,
                 left: annotatedFile.x,
                 label: 'test',
                 fileName: annotatedFile.name,
-                imgWidth: 640,
-                imgHeight: 640
+                imgWidth: 416,
+                imgHeight: 416
               }
             }))
           })

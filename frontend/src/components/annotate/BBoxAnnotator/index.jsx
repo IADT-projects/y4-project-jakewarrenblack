@@ -46,31 +46,34 @@ const BBoxAnnotator = React.forwardRef(
 
     useEffect(() => {
         // check if there are any entries present which are not undefined
-        if (entries.some((entry) => entry !== undefined)) {
-            setSubmissionEntries(
-              entries.map((entry) => {
-                      const multiplier =entry.imgWidth/maxWidth
-                      return {
-                          width: Math.round(entry.width * multiplier),
-                          height: Math.round(entry.height * multiplier),
-                          top: Math.round(entry.top * multiplier),
-                          left: Math.round(entry.left * multiplier),
-                          label: entry.label,
-                          fileName: entry.fileName,
-                          imgWidth: entry.imgWidth,
-                          imgHeight: entry.imgHeight
-                          // width: Math.round(entry.width),
-                          // height: Math.round(entry.height),
-                          // top: Math.round(entry.top),
-                          // left: Math.round(entry.left),
-                          // label: entry.label,
-                          // fileName: entry.fileName,
-                          // imgWidth: entry.imgWidth,
-                          // imgHeight: entry.imgHeight
-                      }
-              })
-            );
-        }
+        console.log('entries: ', entries)
+        console.log('multiplier: ', multiplier)
+        // if (entries.some((entry) => entry !== undefined)) {
+        //     setSubmissionEntries(
+        //       entries.map((entry) => {
+        //               const multiplier =entry.imgWidth/maxWidth
+        //           console.log('multiplier: ', multiplier)
+        //               return {
+        //                   width: Math.round(entry.width * multiplier),
+        //                   height: Math.round(entry.height * multiplier),
+        //                   top: Math.round(entry.top * multiplier),
+        //                   left: Math.round(entry.left * multiplier),
+        //                   label: entry.label,
+        //                   fileName: entry.fileName,
+        //                   imgWidth: entry.imgWidth,
+        //                   imgHeight: entry.imgHeight
+        //                   // width: Math.round(entry.width),
+        //                   // height: Math.round(entry.height),
+        //                   // top: Math.round(entry.top),
+        //                   // left: Math.round(entry.left),
+        //                   // label: entry.label,
+        //                   // fileName: entry.fileName,
+        //                   // imgWidth: entry.imgWidth,
+        //                   // imgHeight: entry.imgHeight
+        //               }
+        //       })
+        //     );
+        // }
     }, [entries, multiplier]);
 
     const [status, setStatus] = useState("free");
@@ -212,6 +215,7 @@ const BBoxAnnotator = React.forwardRef(
       },
     }));
 
+    // An entry item is created when an annotation is added
     const entryItem = (entry, i) => {
       return entry ? (
         <div
@@ -378,9 +382,7 @@ const BBoxAnnotator = React.forwardRef(
           ) : null}
 
 
-          {entries.length &&
-            entries[selected] &&
-            entryItem(entries[selected], entries[selected].id)}
+          {entries.length && entries[selected] && entryItem(entries[selected], entries[selected].id)}
         </div>
           <div className={'w-full flex justify-center align-center'}>
             <button onClick={(e) => {
