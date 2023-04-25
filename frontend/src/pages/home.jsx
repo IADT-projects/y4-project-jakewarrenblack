@@ -116,7 +116,7 @@ export const Home = () => {
           <Button
             onClick={() => {
               axios
-                .get(`${serverURL}/api/buzz`)
+                .get(`${serverURL}/api/publish-mqtt`)
                 .then((res) => {
                   console.log(res);
                 })

@@ -1,5 +1,5 @@
 const express = require("express");
-const { runVideoDetection } = require("./utils/utils");
+const { runVideoDetection, buzz } = require("./utils/utils");
 const { classifyImg } = require("./detect");
 const { Server } = require("socket.io");
 const { createServer } = require("http");
@@ -16,11 +16,36 @@ const port = process.env.PORT || 3002;
 app.use(cors());
 const httpServer = createServer(app);
 
-const socketServer = new Server(httpServer, {
-  cors: {
-    origin: "*",
-    methods: ["POST", "GET"],
-  },
+var mqtt = require("mqtt");
+
+var options = {
+  host: process.env.HIVE_MQ_URL,
+  port: 8883,
+  protocol: "mqtts",
+  username: process.env.HIVE_MQ_USERNAME,
+  password: process.env.HIVE_MQ_PASSWORD,
+};
+
+// initialize the MQTT client
+var client = mqtt.connect(options);
+
+// setup the callbacks
+client.on("connect", function () {
+  console.log("MQTT Connected");
+});
+
+client.on("error", function (error) {
+  console.log("MQTT error: ", error);
+});
+
+// subscribe to topic 'my/test/topic'
+client.subscribe("rpi/buzz");
+
+client.on("message", function (topic, message) {
+  // called each time a message is received
+  console.log("Received message:", topic, message.toString());
+
+  buzz();
 });
 
 //const serverURL = 'https://raid-middleman.herokuapp.com/'

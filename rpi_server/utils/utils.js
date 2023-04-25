@@ -1,9 +1,30 @@
-const path = require('path');
-const cv = require('@u4/opencv4nodejs');
+const path = require("path");
+const cv = require("@u4/opencv4nodejs");
 const util = require("util");
 const os = require("os");
 
+let GPIO, Buzzer;
+
+if (os.platform() === "linux") {
+  GPIO = require("onoff").Gpio;
+  Buzzer = new GPIO(17, "out");
+}
+
 exports.cv = cv;
+
+const buzz = () => {
+  const duration = 5000; // 5 seconds
+  const frequency = 100; // 100ms on, 100ms off
+  let intervalId = setInterval(() => {
+    Buzzer.writeSync(Buzzer.readSync() ^ 1); // toggle the buzzer state
+  }, frequency);
+  setTimeout(() => {
+    clearInterval(intervalId); // stop the buzzing after the duration has passed
+    Buzzer.writeSync(0);
+  }, duration);
+};
+
+exports.buzz = buzz;
 
 /*
 Various attempts at improving speed/framerate:
@@ -28,24 +49,20 @@ Various attempts at improving speed/framerate:
   stream-format=byte-stream, alignment=au ! h264parse ! rtph264pay name=pay0 pt=96"
 */
 
-
-
 let capture;
 
-if(os.platform() === 'linux'){
+if (os.platform() === "linux") {
   // seems reasonably fast:
-  capture = new cv.VideoCapture('v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink')
+  capture = new cv.VideoCapture(
+    "v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,format=BGR,width=640,height=480,framerate=30/1 ! appsink"
+  );
+} else {
+  capture = new cv.VideoCapture(0);
 }
-else{
-  capture = new cv.VideoCapture(0)
-}
-
 
 const grabFrames = async (videoFile, delay, onFrame) => {
-  
   //let done = false;
-  while(true) {    
-    
+  while (true) {
     let frame = capture.read();
 
     if (frame.empty) {
@@ -61,55 +78,50 @@ const grabFrames = async (videoFile, delay, onFrame) => {
     }
 
     // Delay before reading the next frame
-    await new Promise(resolve => setTimeout(resolve, delay));
-
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 };
 exports.grabFrames = grabFrames;
 
 exports.runVideoDetection = async (src, detect) => {
-
-  let res = await grabFrames(src, 1000, async frame => {
-    return await detect(frame) // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
-  })
+  let res = await grabFrames(src, 1000, async (frame) => {
+    return await detect(frame); // this is the classifyImg function, which returns jpeg encoded version of our image, with the yolo stuff applied to it
+  });
 
   return res;
 };
 
-
-
-exports.drawRectAroundBlobs = (binaryImg, dstImg, minPxSize, fixedRectWidth) => {
-  const {
-    centroids,
-    stats
-  } = binaryImg.connectedComponentsWithStats();
+exports.drawRectAroundBlobs = (
+  binaryImg,
+  dstImg,
+  minPxSize,
+  fixedRectWidth
+) => {
+  const { centroids, stats } = binaryImg.connectedComponentsWithStats();
 
   // pretend label 0 is background
   for (let label = 1; label < centroids.rows; label += 1) {
-    const [x1, y1] = [stats.at(label, cv.CC_STAT_LEFT), stats.at(label, cv.CC_STAT_TOP)];
+    const [x1, y1] = [
+      stats.at(label, cv.CC_STAT_LEFT),
+      stats.at(label, cv.CC_STAT_TOP),
+    ];
     const [x2, y2] = [
       x1 + (fixedRectWidth || stats.at(label, cv.CC_STAT_WIDTH)),
-      y1 + (fixedRectWidth || stats.at(label, cv.CC_STAT_HEIGHT))
+      y1 + (fixedRectWidth || stats.at(label, cv.CC_STAT_HEIGHT)),
     ];
     const size = stats.at(label, cv.CC_STAT_AREA);
     const blue = new cv.Vec(255, 0, 0);
     if (minPxSize < size) {
-      dstImg.drawRectangle(
-        new cv.Point(x1, y1),
-        new cv.Point(x2, y2),
-        { color: blue, thickness: 2 }
-      );
+      dstImg.drawRectangle(new cv.Point(x1, y1), new cv.Point(x2, y2), {
+        color: blue,
+        thickness: 2,
+      });
     }
   }
 };
 
 const drawRect = (image, rect, color, opts = { thickness: 2 }) =>
-  image.drawRectangle(
-    rect,
-    color,
-    opts.thickness,
-    cv.LINE_8
-  );
+  image.drawRectangle(rect, color, opts.thickness, cv.LINE_8);
 
 exports.drawRect = drawRect;
 exports.drawBlueRect = (image, rect, opts = { thickness: 2 }) =>
