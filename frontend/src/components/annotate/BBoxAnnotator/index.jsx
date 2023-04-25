@@ -39,10 +39,7 @@ const BBoxAnnotator = React.forwardRef(
     const [maxWidth, setMaxWidth] = useState(1)
     const [annotatedFiles, setAnnotatedFiles] = useState([])
     const [finalEntries, setFinalEntries] = useState([])
-
     const { token } = useContext(AuthContext);
-
-
 
     useEffect(() => {
         // check if there are any entries present which are not undefined
@@ -51,8 +48,14 @@ const BBoxAnnotator = React.forwardRef(
         if (entries.some((entry) => entry !== undefined)) {
             setSubmissionEntries(
               entries.map((entry) => {
+                  let multiplier;
 
-                  const multiplier =maxWidth/entry.imgWidth
+                  if(entry.auto === true){
+                      multiplier = maxWidth/entry.imgWidth
+                  }
+                  else{
+                      multiplier = entry.imgWidth/maxWidth
+                  }
 
                   console.log('multiplier: ', multiplier)
                       return {
@@ -63,15 +66,9 @@ const BBoxAnnotator = React.forwardRef(
                           label: entry.label,
                           fileName: entry.fileName,
                           imgWidth: entry.imgWidth,
-                          imgHeight: entry.imgHeight
-                          // width: Math.round(entry.width),
-                          // height: Math.round(entry.height),
-                          // top: Math.round(entry.top),
-                          // left: Math.round(entry.left),
-                          // label: entry.label,
-                          // fileName: entry.fileName,
-                          // imgWidth: entry.imgWidth,
-                          // imgHeight: entry.imgHeight
+                          imgHeight: entry.imgHeight,
+                          auto: entry.auto,
+                          file: entry.file,
                       }
               })
             );
@@ -87,14 +84,24 @@ const BBoxAnnotator = React.forwardRef(
       setMaxWidth(bBoxAnnotatorRef.current?.offsetWidth || 1)
       const maxHeight = bBoxAnnotatorRef.current?.offsetHeight || 1;
       const imageElement = new Image();
-      imageElement.src = url;
+
+      if(url.auto){
+          imageElement.src = url.src
+      }
+      else{
+          imageElement.src = url;
+      }
 
       imageElement.onload = function () {
         const width = imageElement.width;
         const height = imageElement.height;
 
-
-          setMultiplier(maxWidth/width)
+        if(url.auto){
+            setMultiplier(width/maxWidth)
+        }
+        else{
+            setMultiplier(maxWidth/width)
+        }
 
         setImageFrameStyle({
           backgroundImageSrc: imageElement.src,
@@ -286,11 +293,33 @@ const BBoxAnnotator = React.forwardRef(
 
                   console.log('Relevant file: ', relevantFile);
 
+                  // if image was auto-annotated, use the buffer returned from the server instead of the buffer received from the original file
+
+
                   if (relevantFile) {
-                      const fileToBeAdded = {
-                          file: relevantFile.file, // exclude all the metadata
-                          annotation: entry,
-                      };
+                      let fileToBeAdded;
+
+                      console.log('entry about to be submitted: ', entry)
+
+                      if(entry.auto){
+                          fileToBeAdded = {
+                              file: entry.file, // exclude all the metadata
+                              annotation: {
+                                  ...entry,
+                                  width: entry.width + entry.left,
+                                  height: entry.height + entry.top
+                              },
+                          };
+                      }
+                      else{
+                          fileToBeAdded = {
+                              file: relevantFile.file, // exclude all the metadata
+                              annotation: entry,
+                          };
+                      }
+
+                      console.log('relevant file: ', fileToBeAdded)
+
 
                       setAnnotatedFiles((prevAnnotatedFiles) => [...prevAnnotatedFiles, fileToBeAdded]);
                   }
@@ -321,6 +350,8 @@ const BBoxAnnotator = React.forwardRef(
 
               if (annotatedFiles.length) {
                       const formData = new FormData();
+
+                      console.log('annotated files, just before submit: ', annotatedFiles)
 
                       annotatedFiles.forEach((annotatedFile) => {
                           formData.append("files[]", annotatedFile.file);
@@ -384,7 +415,8 @@ const BBoxAnnotator = React.forwardRef(
           ) : null}
 
 
-          {submissionEntries.length && submissionEntries[selected] && entryItem(submissionEntries[selected], entries[selected].id)}
+          {entries.length && entries[selected] && entryItem(entries[selected], entries[selected].id)}
+          {/*{submissionEntries.length && submissionEntries[selected] && entryItem(submissionEntries[selected], entries[selected].id)}*/}
         </div>
           <div className={'w-full flex justify-center align-center'}>
             <button onClick={(e) => {

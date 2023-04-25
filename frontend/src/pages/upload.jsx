@@ -1,11 +1,10 @@
 import "react-dropzone-uploader/dist/styles.css";
 import Dropzone from "react-dropzone-uploader";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { getDroppedOrSelectedFiles } from "html5-file-selector";
+import {useContext, useEffect, useState} from "react";
+import {getDroppedOrSelectedFiles} from "html5-file-selector";
 import BBoxAnnotator from "../components/annotate";
 import axios from "axios";
-import { AuthContext } from "../utils/AuthContext";
-import {LoginRegister} from "./login_register";
+import {AuthContext} from "../utils/AuthContext";
 
 
 export const Upload = () => {
@@ -39,6 +38,25 @@ export const Upload = () => {
 
   const [autoAnnotatedFiles, setAutoAnnotatedFiles] = useState([])
 
+  const b64toBlob = (b64Data, contentType= '', sliceSize= 512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, {type: contentType});
+  }
+
   useEffect(async () => {
     if(files.length === numChosenFiles){
       const formData = new FormData();
@@ -68,6 +86,11 @@ export const Upload = () => {
             console.log('Auto annotations received: ', res)
 
             setAnnotations(res.data.annotations.map((annotatedFile) => {
+
+              const imageBlob = b64toBlob(annotatedFile.base64, annotatedFile.type);
+              const imageFile = new File([imageBlob], annotatedFile.name);
+
+
               return {
                 previewUrl: annotatedFile.base64,
                 width: (annotatedFile.width - annotatedFile.x),
@@ -77,7 +100,9 @@ export const Upload = () => {
                 label: 'test',
                 fileName: annotatedFile.name,
                 imgWidth: 416,
-                imgHeight: 416
+                imgHeight: 416,
+                auto: true,
+                file: imageFile
               }
             }))
           })
@@ -142,7 +167,7 @@ export const Upload = () => {
     return files[selected] ? (
       <div className={"m-auto h-full"}>
         <BBoxAnnotator
-          url={annotations[selected]?.previewUrl ? `data:image/png;base64,${annotations[selected].previewUrl}` : files[selected].meta.previewUrl}
+          url={annotations[selected]?.previewUrl ? {src: `data:image/png;base64,${annotations[selected].previewUrl}`, auto: true} : files[selected].meta.previewUrl}
           entries={annotations}
           selected={selected}
           files={files}
