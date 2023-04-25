@@ -37,7 +37,7 @@ export const AuthProvider = (props) => {
     try {
       const options = attachTokenToHeaders(token);
       const response = await axios.get(
-        "http://raid-middleman.herokuapp.com//api/auth/me",
+        "http://raid-middleman.herokuapp.com/api/auth/me",
         options
       );
 
@@ -66,7 +66,7 @@ export const AuthProvider = (props) => {
 
     try {
       const response = await axios.post(
-        "http://https://raid-middleman.herokuapp.com//api/auth/login",
+        "https://raid-middleman.herokuapp.com/api/auth/login",
         {
           ...formData,
         }
@@ -142,7 +142,7 @@ export const AuthProvider = (props) => {
 
     try {
       const response = await axios.post(
-        "http://https://raid-middleman.herokuapp.com//api/auth/register",
+        "https://raid-middleman.herokuapp.com/api/auth/register",
         {
           ...formData,
         }
