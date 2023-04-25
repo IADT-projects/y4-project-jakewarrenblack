@@ -53,43 +53,43 @@ const classifyImg = (img) => {
       const classId = scores.indexOf(Math.max(...scores));
       const confidence = scores[classId];
 
+      // I notice *lots* of false positives with this class, so just ignoring it
       if (confidence > minConfidence) {
-        const box = detection.slice(0, 4);
+        if (labels[classId] !== "dog-american_pit_bull_terrier\r") {
+          const box = detection.slice(0, 4);
 
-        const centerX = parseInt(box[0] * imgWidth);
-        const centerY = parseInt(box[1] * imgHeight);
-        const width = parseInt(box[2] * imgWidth);
-        const height = parseInt(box[3] * imgHeight);
+          const centerX = parseInt(box[0] * imgWidth);
+          const centerY = parseInt(box[1] * imgHeight);
+          const width = parseInt(box[2] * imgWidth);
+          const height = parseInt(box[3] * imgHeight);
 
-        const x = parseInt(centerX - width / 2);
-        const y = parseInt(centerY - height / 2);
+          const x = parseInt(centerX - width / 2);
+          const y = parseInt(centerY - height / 2);
 
-        boxes.push(new cv.Rect(x, y, width, height));
-        confidences.push(confidence);
-        classIDs.push(classId);
+          boxes.push(new cv.Rect(x, y, width, height));
+          confidences.push(confidence);
+          classIDs.push(classId);
 
-        const indices = cv.NMSBoxes(
-          boxes,
-          confidences,
-          minConfidence,
-          nmsThreshold
-        );
+          const indices = cv.NMSBoxes(
+            boxes,
+            confidences,
+            minConfidence,
+            nmsThreshold
+          );
 
-        indices.forEach((i) => {
-          const rect = boxes[i];
+          indices.forEach((i) => {
+            const rect = boxes[i];
 
-          const pt1 = new cv.Point(rect.x, rect.y);
-          const pt2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
-          const rectColor = new cv.Vec(255, 0, 0);
-          const rectThickness = 2;
-          const rectLineType = cv.LINE_8;
+            const pt1 = new cv.Point(rect.x, rect.y);
+            const pt2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+            const rectColor = new cv.Vec(255, 0, 0);
+            const rectThickness = 2;
+            const rectLineType = cv.LINE_8;
 
-          // Set the two return values
-          text = labels[classIDs[i]];
-          retConfidence = confidence;
+            // Set the two return values
+            text = labels[classIDs[i]];
+            retConfidence = confidence;
 
-          // I notice *lots* of false positives with this class
-          if (text != "dog-american_pit_bull_terrier") {
             // draw the rect for the object
             img.drawRectangle(pt1, pt2, rectColor, rectThickness, rectLineType);
 
@@ -101,8 +101,8 @@ const classifyImg = (img) => {
 
             // put text on the object
             img.putText(text, org, fontFace, fontScale, textColor, thickness);
-          }
-        });
+          });
+        }
       }
     });
   });
