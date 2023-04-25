@@ -1,156 +1,126 @@
 const express = require("express");
-const { runVideoDetection} = require("./utils/utils");
-const { classifyImg} = require('./detect')
+const { runVideoDetection } = require("./utils/utils");
+const { classifyImg } = require("./detect");
 const { Server } = require("socket.io");
-const {createServer} = require("http");
+const { createServer } = require("http");
 const app = express();
-const cors = require('cors')
+const cors = require("cors");
 const axios = require("axios");
-const {encode} = require("base64-arraybuffer");
-const isPi = require('detect-rpi');
+const { encode } = require("base64-arraybuffer");
+const isPi = require("detect-rpi");
 const { io } = require("socket.io-client");
 
-require('dotenv').config();
+require("dotenv").config();
 const port = process.env.PORT || 3002;
 
-app.use(cors())
-const httpServer = createServer(app)
+app.use(cors());
+const httpServer = createServer(app);
 
 const socketServer = new Server(httpServer, {
-    cors: {
-        origin: '*',
-        methods: ['POST', 'GET'],
-    }
+  cors: {
+    origin: "*",
+    methods: ["POST", "GET"],
+  },
 });
-
-
-
 
 //const serverURL = 'https://raid-middleman.herokuapp.com/'
-const serverURL = 'http://localhost:5000'
+const serverURL = "http://localhost:5000";
 const socketClient = io.connect(serverURL, {
-    extraHeaders: {
-        'x-is-pi': 'true'
-    }
+  extraHeaders: {
+    "x-is-pi": "true",
+  },
 });
 
-// socketClient.on("connection", function (base64string) {
-//     console.log('Pi connected to the server')
-// });
-
-
-// socketServer.on("connection", (socket) => {
-//     console.log('middleman server has connected');  socket.on('disconnect', function () {
-//         console.log('middleman server has disconnected');
-//     });
-// });
-
-
-
 /*
-* So it runs every 500ms
-* If res.text -> potentially saw something
-* Increment a counter after every iteration, up to a total of 5 -> which is 2.5 seconds in real time
-* Every time we iterate, if the response has a label (some detection) -> push to array out here
-* If the response does not have a label (no detection) -> reset the counter to 0 and empty the array
-* If we reach the top of the counter and the array is not empty, it probably is actually seeing something and not a false positive
-*/
+ * So it runs every 500ms
+ * If res.text -> potentially saw something
+ * Every time something is detected, incremenet a detection counter, up to a total of 5
+ * If we see the same thing 5 or more times within the space of the cooldown (30 seconds), we can be pretty sure it's not the model making a mistake
+ * Finally, if the above is true, calculate the average confidence value across our 5 detections, and see if it's above 50%
+ * Emit a socketIO event to say we detected something, and clear that object out of the detections
+ */
 
-let counter = 0;
-let labels = []
+const cooldown = 30000; // 5 seconds cooldown period
+const minConfidence = 0.5;
+const detectionWindow = 5;
+const detectionInterval = 500;
 
+let detections = {};
+
+let lastDetectionTime = Date.now();
 
 setInterval(() => {
-        // run object detection
-        runVideoDetection(0, classifyImg).then(async (res) => {
-            let image;
+  // run object detection
+  runVideoDetection(0, classifyImg)
+    .then(async (res) => {
+      let image;
 
-            if(res.img){
-                image = encode(res.img) // this is an array buffer until converted to base64
-                socketClient.emit('receiveImage', image);
-            }
+      if (res.img) {
+        image = encode(res.img); // this is an array buffer until converted to base64
+        socketClient.emit("receiveImage", image);
+      }
 
+      // means there is a label, potentially saw something
+      if (res.text && res.confidence) {
+        const label = res.text;
+        const confidence = parseInt(res.confidence * 100);
 
-            // means there is a label, potentially saw something
-            if(res.text){
+        // check if the confidence is above the minimum
+        if (confidence < minConfidence) {
+          console.log(`Skipping ${label} detection, confidence below minimum`);
+          return;
+        }
 
-               // up to 2.5 seconds (500ms per iteration)
-               if(counter < 5){
-                    labels.push(res.text)
-                    counter++
-               }
-               else{
-                    if(labels.length){
-                        // means we've reached the last iteration of the counter and there are still items in the array
-                        // so we've gone through 5 iterations where the response had a label/saw an object
-                        socketClient.emit('detection', res.text);
-                        labels = []
-                        counter = 0;
-                    }
-               }
+        const now = Date.now();
+        const timeElapsedSinceLastDetection = (now - lastDetectionTime) / 1000;
 
-            }
-            else{
-                labels = []
-                counter = 0;
-            }
+        // add detection to the detections object
+        if (!detections[label]) {
+          detections[label] = {
+            count: 1,
+            confidenceSum: confidence,
+            firstDetected: now,
+          };
+        } else {
+          detections[label].count++;
+          detections[label].confidenceSum += confidence;
+        }
 
+        // check if we have enough detections in the detection window
+        // means we need to have seen the same thing a minimum number of times within the space of the cooldown period
+        // so e.g. saying, if the time that has passed between now and the first time you saw a 'pug' is less than 30 seconds
+        // AND you've seen a pug more than five times in that space of time, it's a positive
+        if (
+          detections[label].count >= detectionWindow &&
+          timeElapsedSinceLastDetection <= cooldown
+        ) {
+          // if we get to here, it means we've detected the same thing 5 or more times within the timeframe of the cooldown period
 
-            // if(res.text){
-            //     // if e.g. we just detected a person, then detect a person again immediately afterward, don't notify for that
-            //     // wait for 10 iterations before emitting for the same object detection again
-            //
-            //     // it will STILL emit if the object it's detecting CHANGES
-            //     if(res.text.split(' ')[0] !== prevLabel || (emitCount === 0)){
-            //         io.emit('detection', res.text);
-            //
-            //         // model will need to be retrained. right now it's just COCO dataset, need to modify for just animals. for now I'll check what was detected.
-            //         if(res.text.split(' ')[0] === 'person'){
-            //             console.log('saw a dog')
-            //
-            //             await axios({
-            //                 method: 'POST',
-            //                 url: process.env.ROBOFLOW_API_KEY,
-            //                 params: {
-            //                     api_key: 'NotZ49lvMpo1QwEINQgR'
-            //                 },
-            //                 data: image,
-            //                 headers: {
-            //                     "Content-Type": "application/x-www-form-urlencoded",
-            //                 }
-            //             })
-            //             .then(async (res) => {
-            //                 console.log(res.data)
-            //
-            //                 // no prediction, or less than 75% confident of prediction
-            //                 // if(!res.data.predictions.length || res.data.predictions.confidence < 0.75){
-            //                 //     shouldBuzz = true;
-            //                 // }
-            //
-            //             }).catch((e) => {
-            //                 console.log(e.message)
-            //             })
-            //         }
-            //
-            //         // if it's the case that we've emitted an event for this object already, but emitCount is 0, let it emit again, but reset counter
-            //         emitCount = 10;
-            //     }
-            //     else{
-            //         // every time we don't emit, decrease the counter,
-            //         // so on the 10th iteration, if we're still detecting the same object as the first time, let the user know
-            //         emitCount--;
-            //     }
-            //
-            //     // exclude the confidence score
-            //     prevLabel = res.text.split(' ')[0]
-            // }
+          // calculate the average confidence and make sure the average confidence of our 5 detections is over 50%
+          const avgConfidence =
+            detections[label].confidenceSum / detections[label].count;
 
-        }).catch((e) => {
-            console.log(e)
-        })
+          // check if the average confidence is above the minimum
+          if (avgConfidence >= minConfidence) {
+            console.log(
+              `Emitting detection event for ${label} with average confidence ${avgConfidence}`
+            );
+            socketClient.emit("detection", label);
+          }
 
-},500)
+          // reset the detections for this label
+          detections[label] = undefined;
+        }
+
+        // update the time of the last detection
+        lastDetectionTime = now;
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}, detectionInterval);
 
 httpServer.listen(port, () => {
-    console.log(`HTTP Server listening on port ${port}`)
-})
+  console.log(`HTTP Server listening on port ${port}`);
+});

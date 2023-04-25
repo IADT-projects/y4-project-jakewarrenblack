@@ -14,16 +14,23 @@
 //     )
 // }
 
-
-export const CaptureCard = ({caption, src, count, onClick}) => {
-    return (
-
-        /*Couple of pixels of bg image visible at bottom left of card (above caption) if entire bg image is rounded-md */
-        <div style={{backgroundImage:`url(${src})`}} className={'max-h-40 bg-center rounded-md rounded-b-lg h-screen h-40 bg-cover mt-1 flex flex-col justify-end items-center'}>
-            {/* outer div is for bg image */}
-            <div className={'bg-navyLight w-full flex justify-center items-center rounded-b-md'}>
-                <h2 className={'text-white my-1 font-semibold'}>{caption}</h2>
-            </div>
-        </div>
-    )
-}
+export const CaptureCard = ({ caption, src, count, onClick }) => {
+  return (
+    /*Couple of pixels of bg image visible at bottom left of card (above caption) if entire bg image is rounded-md */
+    <div
+      style={{ backgroundImage: `url(${src})` }}
+      className={
+        "mt-1 flex h-screen h-40 max-h-40 flex-col items-center justify-end rounded-md rounded-b-lg bg-cover bg-center"
+      }
+    >
+      {/* outer div is for bg image */}
+      <div
+        className={
+          "flex w-full items-center justify-center rounded-b-md bg-navyLight"
+        }
+      >
+        <h2 className={"my-1 font-semibold text-white"}>{caption}</h2>
+      </div>
+    </div>
+  );
+};
