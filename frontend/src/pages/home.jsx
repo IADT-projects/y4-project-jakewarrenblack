@@ -6,8 +6,8 @@ import { AuthContext } from "../utils/AuthContext";
 import { useLocation } from "react-router-dom";
 
 export const Home = () => {
-  //const serverURL = `https://raid-middleman.herokuapp.com/`
-  const serverURL = "http://localhost:5000";
+  const serverURL = `https://raid-middleman.herokuapp.com`;
+  //const serverURL = "http://localhost:5000";
   const publicVapidKey =
     "BM6G-d8QYWAUCE5C7CKxmSVmEnOgUJzOs-Dml88APJqKoC3Jv9DF2sn9_mTTsz0KHyYArGYkaw4Z7X0fbdKWAKk";
 

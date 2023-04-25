@@ -76,7 +76,8 @@ export const LoginRegister = () => {
             <Button
               onClick={(e) => {
                 e.preventDefault();
-                window.location.href = "http://localhost:5000/api/auth/google";
+                window.location.href =
+                  "https://raid-middleman.herokuapp.com/api/auth/google";
               }}
               btnText={"Sign in with Google"}
             />

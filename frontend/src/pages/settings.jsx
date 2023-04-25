@@ -108,9 +108,11 @@ export const Settings = () => {
         onClick={() => {
           // Clear the context first
           clearAllValues();
-          axios.get(`http://localhost:5000/api/auth/logout`).then((res) => {
-            navigate("/");
-          });
+          axios
+            .get(`https://raid-middleman.herokuapp.com/api/auth/logout`)
+            .then((res) => {
+              navigate("/");
+            });
         }}
       >
         Logout

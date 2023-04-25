@@ -12,9 +12,12 @@ export const SingleAnimal = (props) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/getimages?folderName=${animal}`, {
-        headers: { "x-auth-token": token },
-      })
+      .get(
+        `https://raid-middleman.herokuapp.com/api/getimages?folderName=${animal}`,
+        {
+          headers: { "x-auth-token": token },
+        }
+      )
       .then((res) => {
         console.log("Res: ", res);
         setImages(
@@ -52,7 +55,7 @@ export const SingleAnimal = (props) => {
                   onClick={() => {
                     axios
                       .get(
-                        `http://localhost:5000/api/delete-screenshot?id=${id}`,
+                        `https://raid-middleman.herokuapp.com/api/delete-screenshot?id=${id}`,
                         {
                           headers: { "x-auth-token": token },
                         }
