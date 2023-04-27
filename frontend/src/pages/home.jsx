@@ -82,7 +82,7 @@ export const Home = () => {
   return (
     <div
       className={
-        "m-auto flex min-h-screen w-full w-[800px] flex-col items-center justify-center bg-navy p-2 [&>*]:w-full"
+        "m-auto flex min-h-screen w-[800px] w-full flex-col items-center justify-center bg-navy p-2 [&>*]:w-full"
       }
     >
       <div className={"flex flex-col [&>*]:w-full"}>
@@ -98,7 +98,7 @@ export const Home = () => {
             "https://placeholder.pics/svg/600/DEDEDE/555555/Attempting%20to%20load%20video%20feed..."
           }
         />
-        <div className={"mt-2 mb-8"}>
+        <div className={"mb-8 mt-2"}>
           <Button
             onClick={async () => {
               // I will also add the type of detection. So eg the directory structure could be: userID/dogs, or userID/cats

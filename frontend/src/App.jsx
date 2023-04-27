@@ -12,10 +12,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
 
 import { Home } from "./pages/home";
-import { LoginRegister } from "./pages/login_register";
-import { Pairing } from "./pages/pairing";
+import { LoginRegister } from "./pages/LoginRegister";
 import { Captures } from "./pages/captures";
-import { Pet } from "./pages/pets";
+import { Pet } from "./pages/Pet";
 import { Settings } from "./pages/settings";
 import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
@@ -54,7 +53,7 @@ function App() {
       {/* Height of container fills screen but excludes bottom navigation in its height */}
       <div
         className={
-          "m-auto flex w-full w-[800px] flex-col items-center justify-center bg-navy p-2 [&>*]:w-full"
+          "m-auto flex w-[800px] w-full flex-col items-center justify-center bg-navy p-2 [&>*]:w-full"
         }
       >
         {loading ? (
@@ -65,7 +64,6 @@ function App() {
             <Route path="/" element={<ProtectedRoute />}>
               <Route path="/upload" element={<Upload />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/pair" element={<Pairing />} />
 
               <Route path="/captures" element={<Captures />} />
               <Route path="/captures/:animal" element={<SingleAnimal />} />
