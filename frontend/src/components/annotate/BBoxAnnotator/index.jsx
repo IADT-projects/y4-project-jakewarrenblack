@@ -46,6 +46,9 @@ const BBoxAnnotator = React.forwardRef(
     const [annotatedFiles, setAnnotatedFiles] = useState([]);
     const [finalEntries, setFinalEntries] = useState([]);
 
+    const [touch, setTouch] = useState(null);
+    const imageFrameRef = useRef(null);
+
     const { token } = useContext(AuthContext);
 
     useEffect(() => {
@@ -127,6 +130,21 @@ const BBoxAnnotator = React.forwardRef(
       setPointer(crop(pageX, pageY));
     };
 
+    // Handlers and useEffects for mouse events mouseDown, mouseMove, mouseUp
+    // a mouseDownHandler which is passed straight into the image onMouseDown event
+    // two useEffects, one for mouse move, and one for mouse up, each with a handler for their respective events
+    const mouseDownHandler = (e) => {
+      switch (status) {
+        case "free":
+        case "input":
+          if (e.button !== 2) {
+            setOffset(crop(e.pageX, e.pageY));
+            setPointer(crop(e.pageX, e.pageY));
+            setStatus("hold");
+          }
+      }
+    };
+
     useEffect(() => {
       const mouseMoveHandler = (e) => {
         switch (status) {
@@ -151,6 +169,70 @@ const BBoxAnnotator = React.forwardRef(
       return () => window.removeEventListener("mouseup", mouseUpHandler);
     }, [status, labelInputRef]);
 
+    // handlers and useEffects for touch events - same as above, but for touch instead of mouse
+    const touchStartHandler = (e) => {
+      // the preventDefault in these touch handlers is important. It prevents the page from scrolling as you draw.
+      e.preventDefault();
+      switch (status) {
+        case "free":
+        case "input":
+          if (e.button !== 2) {
+            const touch = e.touches[0];
+
+            setOffset(crop(touch.pageX, touch.pageY));
+            setPointer(crop(touch.pageX, touch.pageY));
+            setStatus("hold");
+          }
+      }
+    };
+
+    useEffect(() => {
+      const imageRef = imageFrameRef.current;
+      if (!imageRef) {
+        return;
+      }
+      const touchMoveHandler = (e) => {
+        e.preventDefault();
+        switch (status) {
+          case "hold":
+            const touch = e.touches[0];
+            updateRectangle(touch.pageX, touch.pageY);
+        }
+      };
+
+      const touchMoveListener = imageRef.addEventListener(
+        "touchmove",
+        touchMoveHandler
+      );
+      return () => imageRef.removeEventListener("touchmove", touchMoveListener);
+    }, [status]);
+
+    useEffect(() => {
+      const imageRef = imageFrameRef.current;
+      if (!imageRef) {
+        return;
+      }
+      const touchEndHandler = (e) => {
+        console.log("touch ended");
+        e.preventDefault();
+        switch (status) {
+          case "hold":
+            if (e.touches && e.touches.length > 0) {
+              const touch = e.touches[0];
+              updateRectangle(touch.pageX, touch.pageY);
+            }
+            setStatus("input");
+            labelInputRef.current?.focus();
+        }
+      };
+
+      const touchEndListener = imageRef.addEventListener(
+        "touchend",
+        touchEndHandler
+      );
+      return () => imageRef.removeEventListener("touchend", touchEndListener);
+    }, [status]);
+
     const addEntry = (label) => {
       const newEntry = {
         ...rect,
@@ -172,18 +254,6 @@ const BBoxAnnotator = React.forwardRef(
       setStatus("free");
       setPointer(null);
       setOffset(null);
-    };
-
-    const mouseDownHandler = (e) => {
-      switch (status) {
-        case "free":
-        case "input":
-          if (e.button !== 2) {
-            setOffset(crop(e.pageX, e.pageY));
-            setPointer(crop(e.pageX, e.pageY));
-            setStatus("hold");
-          }
-      }
     };
 
     const rectangle = () => {
@@ -356,9 +426,11 @@ const BBoxAnnotator = React.forwardRef(
         className={classes.bBoxAnnotator}
         style={{ width: `auto`, height: `100%` }}
         ref={bBoxAnnotatorRef}
+        onTouchStart={touchStartHandler}
         onMouseDown={mouseDownHandler}
       >
         <div
+          ref={imageFrameRef}
           className={classes.imageFrame}
           style={{
             width: `auto`,
