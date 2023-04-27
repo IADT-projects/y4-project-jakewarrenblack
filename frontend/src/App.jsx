@@ -12,9 +12,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
 
 import { Home } from "./pages/home";
-import { LoginRegister } from "./pages/LoginRegister";
+import { LoginRegister } from "./pages/login_register";
 import { Captures } from "./pages/captures";
-import { Pet } from "./pages/Pet";
+import { Pet } from "./pages/pets";
 import { Settings } from "./pages/settings";
 import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
