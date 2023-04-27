@@ -6,7 +6,6 @@ import React, {
   useContext,
 } from "react";
 import { createUseStyles } from "react-jss";
-import { v4 as uuid } from "uuid";
 import BBoxSelector from "../BBoxSelector";
 import LabelBox from "../LabelBox";
 import axios from "axios";
