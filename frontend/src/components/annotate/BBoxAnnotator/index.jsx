@@ -79,7 +79,6 @@ const BBoxAnnotator = React.forwardRef(
 
     useEffect(() => {
       setMaxWidth(bBoxAnnotatorRef.current?.offsetWidth || 1);
-      const maxHeight = bBoxAnnotatorRef.current?.offsetHeight || 1;
       const imageElement = new Image();
       imageElement.src = url;
 

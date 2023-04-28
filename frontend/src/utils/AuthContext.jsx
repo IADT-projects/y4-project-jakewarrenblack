@@ -169,17 +169,13 @@ export const AuthProvider = (props) => {
 
   // check the user's latest_version attribute. this relates to the number of dataset versions they've generated on roboflow.
   // if it's 0, they've never generated a dataset version, so this needs to be done.
-  const hasGeneratedVersion = () => {
-    if (user?.latest_version) {
-      if (user.latest_version === 0) {
-        // they need to go to the /upload page and annotate some images
-        return false;
-      } else {
-        // fine, they can continue to wherever they were going
-        return true;
-      }
-    } else {
+  const hasGeneratedVersion = (user) => {
+    if (user.latest_version === 0) {
+      // they need to go to the /upload page and annotate some images
       return false;
+    } else {
+      // fine, they can continue to wherever they were going
+      return true;
     }
   };
 

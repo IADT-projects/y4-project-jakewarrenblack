@@ -27,7 +27,6 @@ function App() {
   const { loginUserWithOauth, loading, hasGeneratedVersion } =
     useContext(AuthContext);
   const navigate = useNavigate();
-  const outlet = useOutlet();
 
   useEffect(async () => {
     const cookieJwt = Cookies.get("x-auth-cookie");
@@ -35,7 +34,7 @@ function App() {
       await loginUserWithOauth(cookieJwt)
         .then((res) => {
           // navigate(outlet.location.pathname);
-          if (hasGeneratedVersion()) {
+          if (hasGeneratedVersion(res)) {
             navigate("/home");
           } else {
             navigate("/upload");
