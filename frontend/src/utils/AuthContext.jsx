@@ -10,6 +10,10 @@ export const AuthProvider = (props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [submittingImages, setSubmittingImages] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
   const attachTokenToHeaders = (token) => {
     const config = {
       headers: {
@@ -66,7 +70,7 @@ export const AuthProvider = (props) => {
 
     try {
       const response = await axios.post(
-        "https://raid-middleman.herokuapp.com/api/auth/login",
+        `${import.meta.env.VITE_SERVER_URL}/api/auth/login`,
         {
           ...formData,
         }
@@ -108,7 +112,7 @@ export const AuthProvider = (props) => {
       try {
         const options = attachTokenToHeaders(token);
         const response = await axios.get(
-          "https://raid-middleman.herokuapp.com/api/auth/me",
+          `${import.meta.env.VITE_SERVER_URL}/api/auth/me`,
           options
         );
 
@@ -142,7 +146,7 @@ export const AuthProvider = (props) => {
 
     try {
       const response = await axios.post(
-        "https://raid-middleman.herokuapp.com/api/auth/register",
+        `${import.meta.env.VITE_SERVER_URL}/api/auth/register`,
         {
           ...formData,
         }
@@ -192,6 +196,12 @@ export const AuthProvider = (props) => {
     clearAllValues,
     register,
     hasGeneratedVersion,
+    submittingImages,
+    setSubmittingImages,
+    uploadError,
+    setUploadError,
+    uploadSuccess,
+    setUploadSuccess,
   };
 
   return (

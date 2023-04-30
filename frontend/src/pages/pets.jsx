@@ -10,7 +10,7 @@ export const Pet = () => {
 
   useEffect(async () => {
     await axios
-      .get(`https://raid-middleman.herokuapp.com/api/roboflow/getVersionInfo`, {
+      .get(`${import.meta.env.VITE_SERVER_URL}/api/roboflow/getVersionInfo`, {
         headers: {
           "x-auth-token": token,
         },

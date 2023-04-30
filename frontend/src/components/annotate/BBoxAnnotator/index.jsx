@@ -49,7 +49,13 @@ const BBoxAnnotator = React.forwardRef(
     const [touch, setTouch] = useState(null);
     const imageFrameRef = useRef(null);
 
-    const { token } = useContext(AuthContext);
+    const {
+      token,
+      submittingImages,
+      setSubmittingImages,
+      setUploadError,
+      setUploadSuccess,
+    } = useContext(AuthContext);
 
     useEffect(() => {
       // check if there are any entries present which are not undefined
@@ -367,16 +373,26 @@ const BBoxAnnotator = React.forwardRef(
       }
     }, [finalEntries]);
 
+    const testPromise = () => {
+      return new Promise(async (resolve, reject) => {
+        setTimeout(() => {
+          resolve("");
+        }, 2000);
+      });
+    };
+
     useEffect(async () => {
       if (annotatedFiles.length) {
+        setSubmittingImages(true);
+
         await submitEntries()
           .then((res) => {
             console.log("Submit success: ", res);
-            alert("Success");
+
+            //alert("Success");
           })
           .catch((e) => {
             console.log("Submit error: ", e);
-            alert("Something went wrong");
           });
       }
     }, [annotatedFiles]);
@@ -401,9 +417,11 @@ const BBoxAnnotator = React.forwardRef(
             annotatedFiles
           );
 
-          await axios
+          return await axios
             .post(
-              `https://raid-middleman.herokuapp.com/api/roboflow/uploadWithAnnotation`,
+              `${
+                import.meta.env.VITE_SERVER_URL
+              }/api/roboflow/uploadWithAnnotation`,
               formData,
               {
                 headers: {
@@ -412,8 +430,19 @@ const BBoxAnnotator = React.forwardRef(
                 },
               }
             )
-            .then((res) => resolve(res))
-            .catch((e) => reject(e));
+            .then((res) => {
+              setUploadError(null);
+
+              setUploadSuccess(true);
+              setSubmittingImages(false);
+
+              resolve(res);
+            })
+            .catch((e) => {
+              setSubmittingImages(false);
+              setUploadError("error");
+              reject(e);
+            });
         } else {
           reject("Annotate files first");
         }

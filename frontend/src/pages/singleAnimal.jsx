@@ -13,7 +13,7 @@ export const SingleAnimal = (props) => {
   useEffect(() => {
     axios
       .get(
-        `https://raid-middleman.herokuapp.com/api/getimages?folderName=${animal}`,
+        `${import.meta.env.VITE_SERVER_URL}/api/getimages?folderName=${animal}`,
         {
           headers: { "x-auth-token": token },
         }
@@ -55,7 +55,9 @@ export const SingleAnimal = (props) => {
                   onClick={() => {
                     axios
                       .get(
-                        `https://raid-middleman.herokuapp.com/api/delete-screenshot?id=${id}`,
+                        `${
+                          import.meta.env.VITE_SERVER_URL
+                        }/api/delete-screenshot?id=${id}`,
                         {
                           headers: { "x-auth-token": token },
                         }

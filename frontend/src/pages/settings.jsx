@@ -109,7 +109,7 @@ export const Settings = () => {
           // Clear the context first
           clearAllValues();
           axios
-            .get(`https://raid-middleman.herokuapp.com/api/auth/logout`)
+            .get(`${import.meta.env.VITE_SERVER_URL}/api/auth/logout`)
             .then((res) => {
               navigate("/");
             });

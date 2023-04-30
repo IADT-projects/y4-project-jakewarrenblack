@@ -3,14 +3,17 @@ import Dropzone from "react-dropzone-uploader";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { getDroppedOrSelectedFiles } from "html5-file-selector";
 import BBoxAnnotator from "../components/annotate";
-import axios from "axios";
+import { Loader } from "../components/Loader";
+import { Button } from "../components/Button";
 import { AuthContext } from "../utils/AuthContext";
 
 export const Upload = () => {
-  const [selected, setSelected] = useState(0);;
+  const [selected, setSelected] = useState(0);
   const [files, setFiles] = useState([]);
   const [annotations, setAnnotations] = useState([]);
 
+  const { submittingImages, uploadError, uploadSuccess } =
+    useContext(AuthContext);
 
   // file status will change every time we add a file, since we've omitted the get upload params step
   const handleChangeStatus = (
@@ -40,9 +43,7 @@ export const Upload = () => {
         </div>
         <div className={"flex flex-col"}>
           <div
-            className={
-              "flex w-full justify-between px-4 text-5xl text-white"
-            }
+            className={"flex w-full justify-between px-4 text-5xl text-white"}
           >
             {/* If on 0, don't let the user go back, if on the end, go back to the start */}
             <button
@@ -75,7 +76,6 @@ export const Upload = () => {
   };
 
   const MyPreview = ({ preview }) => {
-
     // We've changed bbox annotator to allow entries to be passed in
     // So we should try to find a relevant annotation entry for the image we're looking at right now
 
@@ -99,32 +99,88 @@ export const Upload = () => {
     const text = files.length > 0 ? "Add more files" : "Choose files";
 
     return (
-        <label className={'bg-blue-600 text-white cursor-pointer rounded-sm p-3'}>
-          {text}
-          <input
-            style={{ display: "none" }}
-            type="file"
-            accept={accept}
-            multiple
-            onChange={(e) => {
-              getFilesFromEvent(e).then((chosenFiles) => {
-                onFiles(chosenFiles);
-              });
-            }}
-          />
-        </label>
+      <label className={"cursor-pointer rounded-sm bg-blue-600 p-3 text-white"}>
+        {text}
+        <input
+          style={{ display: "none" }}
+          type="file"
+          accept={accept}
+          multiple
+          onChange={(e) => {
+            getFilesFromEvent(e).then((chosenFiles) => {
+              onFiles(chosenFiles);
+            });
+          }}
+        />
+      </label>
     );
   };
 
-  return (
-  <div style={{ height: "calc(100vh - 85px)" }}>
-    <Dropzone
-      onChangeStatus={handleChangeStatus}
-      InputComponent={myInput}
-      LayoutComponent={myLayout}
-      PreviewComponent={MyPreview}
-      accept="image/*"
-    />
-  </div>
-  );
+  let returnValue;
+
+  // means you've pressed 'finished'
+  if (submittingImages) {
+    returnValue = (
+      <div
+        className="flex items-center justify-center"
+        style={{ height: "calc(100vh - 85px)" }}
+      >
+        <div className={"h-min px-1"}>
+          <div className={"mt-5 flex flex-col items-center justify-center"}>
+            <Loader />
+            <p className={"mt-2 text-2xl text-white"}>Submitting images...</p>
+          </div>
+        </div>
+      </div>
+    );
+  } else {
+    if (!uploadError) {
+      if (uploadSuccess) {
+        returnValue = (
+          <div
+            className="flex items-center justify-center"
+            style={{ height: "calc(100vh - 85px)" }}
+          >
+            <div className={"h-min px-1"}>
+              <div className={"mt-5 flex flex-col items-center justify-center"}>
+                <p className={"mt-2 text-center text-2xl text-white"}>
+                  Upload Successful
+                </p>
+                <Button btnText={"Start Training"} onClick={() => {}} />
+              </div>
+            </div>
+          </div>
+        );
+      } else {
+        returnValue = (
+          <div style={{ height: "calc(100vh - 85px)" }}>
+            <Dropzone
+              onChangeStatus={handleChangeStatus}
+              InputComponent={myInput}
+              LayoutComponent={myLayout}
+              PreviewComponent={MyPreview}
+              accept="image/*"
+            />
+          </div>
+        );
+      }
+    } else {
+      returnValue = (
+        <div
+          className="flex items-center justify-center"
+          style={{ height: "calc(100vh - 85px)" }}
+        >
+          <div className={"h-min px-1"}>
+            <div className={"mt-5 flex flex-col items-center justify-center"}>
+              <p className={"mt-2 text-center text-2xl text-white"}>
+                Something went wrong while uploading
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  return returnValue;
 };
