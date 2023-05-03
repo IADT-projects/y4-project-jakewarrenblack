@@ -8,6 +8,8 @@ export const Pet = () => {
   const { token } = useContext(AuthContext);
   const [data, setData] = useState();
 
+  const [error, setError] = useState(null);
+
   useEffect(async () => {
     await axios
       .get(`${import.meta.env.VITE_SERVER_URL}/api/roboflow/getVersionInfo`, {
@@ -17,9 +19,11 @@ export const Pet = () => {
       })
       .then((res) => {
         setData(res.data.data);
+        setError(null);
       })
       .catch((e) => {
         console.log(e);
+        setError(e.response.data.msg);
       });
   }, []);
 
@@ -47,7 +51,7 @@ export const Pet = () => {
         {data && data.petName}
       </h1>
 
-      {data && (
+      {data && !error ? (
         <div>
           <img
             className="max-h-64 w-full object-cover object-center"
@@ -100,6 +104,23 @@ export const Pet = () => {
               />
             </div>
           </div>
+        </div>
+      ) : (
+        <div>
+          <div
+            className="flex items-center justify-center"
+            style={{ height: "calc(100vh - 85px)" }}
+          >
+            <div className={"h-min px-1"}>
+              <div className={"mt-5 flex flex-col items-center justify-center"}>
+                <p className={"mt-2 text-center text-2xl text-white"}>
+                  You have yet to train a model
+                </p>
+                <Button btnText={"Start Training"} onClick={() => {}} />
+              </div>
+            </div>
+          </div>
+          );
         </div>
       )}
     </div>

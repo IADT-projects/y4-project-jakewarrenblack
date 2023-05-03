@@ -21,6 +21,7 @@ import { AuthContext } from "./utils/AuthContext";
 import { Loader } from "./components/Loader";
 import { Upload } from "./pages/upload";
 import { SingleAnimal } from "./pages/singleAnimal";
+import { Training } from "./pages/training";
 
 function App() {
   // So when user refreshes page, check for a token, and just log them in again
@@ -28,14 +29,15 @@ function App() {
     useContext(AuthContext);
   const navigate = useNavigate();
 
+  const outlet = useOutlet();
+
   useEffect(async () => {
     const cookieJwt = Cookies.get("x-auth-cookie");
     if (cookieJwt) {
       await loginUserWithOauth(cookieJwt)
         .then((res) => {
-          // navigate(outlet.location.pathname);
           if (hasGeneratedVersion(res)) {
-            navigate("/home");
+            navigate(outlet ? outlet.location.pathname : "/home");
           } else {
             navigate("/upload");
           }
@@ -65,6 +67,8 @@ function App() {
               <Route path="/upload" element={<Upload />} />
               <Route path="/home" element={<Home />} />
               <Route path="/pair" element={<Pairing />} />
+
+              <Route path="/train" element={<Training />} />
 
               <Route path="/captures" element={<Captures />} />
               <Route path="/captures/:animal" element={<SingleAnimal />} />
