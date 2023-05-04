@@ -3,12 +3,16 @@ import { Button } from "../components/Button";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../utils/AuthContext";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
+import { Loader } from "../components/Loader";
 
 export const Pet = () => {
   const { token } = useContext(AuthContext);
   const [data, setData] = useState();
 
   const [error, setError] = useState(null);
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
     await axios
@@ -19,10 +23,12 @@ export const Pet = () => {
       })
       .then((res) => {
         setData(res.data.data);
+        setLoading(false);
         setError(null);
       })
       .catch((e) => {
         console.log(e);
+        setLoading(false);
         setError(e.response.data.msg);
       });
   }, []);
@@ -44,6 +50,14 @@ export const Pet = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className={"px-1"}>
@@ -106,22 +120,7 @@ export const Pet = () => {
           </div>
         </div>
       ) : (
-        <div>
-          <div
-            className="flex items-center justify-center"
-            style={{ height: "calc(100vh - 85px)" }}
-          >
-            <div className={"h-min px-1"}>
-              <div className={"mt-5 flex flex-col items-center justify-center"}>
-                <p className={"mt-2 text-center text-2xl text-white"}>
-                  You have yet to train a model
-                </p>
-                <Button btnText={"Start Training"} onClick={() => {}} />
-              </div>
-            </div>
-          </div>
-          );
-        </div>
+        <Navigate to="/train" replace />
       )}
     </div>
   );
