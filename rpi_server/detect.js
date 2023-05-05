@@ -10,7 +10,7 @@ const weightsFile = path.resolve(
 );
 const labelsFile = path.resolve(darknetPath, "obj.names");
 
-const minConfidence = 0.5;
+const minConfidence = 0.4;
 const nmsThreshold = 0.3;
 
 // read classNames and store them in an array

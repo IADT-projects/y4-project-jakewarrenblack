@@ -66,7 +66,7 @@ const socketClient = io.connect(serverURL, {
  */
 
 const cooldown = 30000; // 5 seconds cooldown period
-const minConfidence = 0.5;
+const minConfidence = 0.75; // needs to be 75% confident of a detection
 const detectionWindow = 5;
 const detectionInterval = 500;
 
