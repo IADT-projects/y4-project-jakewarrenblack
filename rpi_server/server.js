@@ -48,8 +48,8 @@ client.on("message", function (topic, message) {
   buzz();
 });
 
-//const serverURL = 'https://raid-middleman.herokuapp.com/'
-const serverURL = "http://localhost:5000";
+const serverURL = 'https://raid-middleman.herokuapp.com/'
+//const serverURL = "http://localhost:5000";
 const socketClient = io.connect(serverURL, {
   extraHeaders: {
     "x-is-pi": "true",
