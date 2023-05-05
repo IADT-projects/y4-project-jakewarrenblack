@@ -141,7 +141,7 @@ export const Upload = () => {
       } else {
         returnValue = (
           <div style={{ height: "calc(100vh - 85px)" }}>
-            <Dropzone
+            <Dropzone.default
               onChangeStatus={handleChangeStatus}
               InputComponent={myInput}
               LayoutComponent={myLayout}

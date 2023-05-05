@@ -7,7 +7,7 @@ import { Navigate } from "react-router-dom";
 import { Loader } from "../components/Loader";
 
 export const Pet = () => {
-  const { token } = useContext(AuthContext);
+  const { token, user, hasGeneratedVersion } = useContext(AuthContext);
   const [data, setData] = useState();
 
   const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ export const Pet = () => {
       .catch((e) => {
         console.log(e);
         setLoading(false);
-        setError(e.response.data.msg);
+        setError(e);
       });
   }, []);
 
@@ -50,6 +50,10 @@ export const Pet = () => {
       </div>
     );
   };
+
+  if (!hasGeneratedVersion(user)) {
+    <Navigate to="/upload" replace />;
+  }
 
   if (loading) {
     return (
