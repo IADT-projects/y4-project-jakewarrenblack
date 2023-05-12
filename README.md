@@ -38,9 +38,34 @@
 
 
 # Abstract:
-```
+<blockquote>
 The aim of this project was to create a novel system capable of leveraging computer vision technology not only to identify animals by species, but of distinguishing one individual from another of the same species based on pet images uploaded by the user, and to be capable of doing this in real-time via a live camera feed. With this achieved, the project was also intended to act as a deterrent for wild animals or stray pets by running a two-stage object detection system in which the first stage detects an animal's species, and the second determines whether the animal is the user's pet, or not. 
-```
+</blockquote>
+
+## Demonstration
+[![OnShow 2023 Demonstration](https://i.imgur.com/9Dcm6Nw.png)](https://www.youtube.com/embed/D4qsbxZiDY8)
+
+## Gallery
+<details>
+  <summary>Click to view</summary>
+  <br/>
+  
+  ![lola-on-feed](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/af17e9f8-51da-438e-b88e-6c468d99dece)
+  
+  ![maggie-on-feed](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/1b5d37e8-7cd2-445a-b2d9-467fdcb7a91f)
+  
+  ![screenshots-page-w-border](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/09d966d9-1b49-4f2a-bc01-99b4fe9a4164)
+  
+  ![trained-model-w-border](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/f29eeab1-c708-45dd-8bf0-5aa69884be76)
+  
+  ![captures-w-border](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/98dc33ec-c559-438d-8822-c7048c345d74)
+  
+  ![live-feed-lily-w-border](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/a120d5ac-8cd5-4c79-b116-e22f579c7c4d)
+  
+  ![live-feed-lola-photo-w-border](https://github.com/IADT-projects/y4-project-jakewarrenblack/assets/47800618/e97c0ac1-e1a4-4121-ad27-7c7f788cfbb9)
+</details>
+
+<br/>
 
 # Running this Project:
 
